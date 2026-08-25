@@ -1,0 +1,22 @@
+{
+  "name": "lead-scraper-dashboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.19.0",
+    "cheerio": "^1.2.0",
+    "csv-parser": "^3.2.1",
+    "express": "^5.2.1",
+    "json2csv": "^6.0.0-alpha.2",
+    "playwright": "^1.62.1",
+    "socket.io": "^4.8.3"
+  }
+}

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Finder & Pipeline Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2B68F6;
+            --primary-hover: #1E51D3;
+            --bg-surface: #F4F7FC;
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            padding: 24px;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Metric Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-card span {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .metric-card h2 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        /* Search Input Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 140px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        button.btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .status-log {
+            margin-top: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            background: #EFF6FF;
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Collapsible Lead Accordion */
+        .lead-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lead-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .lead-card:hover {
+            border-color: #CBD5E1;
+        }
+
+        .lead-header {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1fr auto;
+            gap: 12px;
+            padding: 16px;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .shop-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .shop-cat {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Expand Details Drawer */
+        .lead-drawer {
+            display: none;
+            padding: 16px 20px;
+            background: #F8FAFC;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .lead-card.open .lead-drawer {
+            display: block;
+        }
+
+        .lead-card.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .drawer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .drawer-item {
+            font-size: 13px;
+        }
+
+        .drawer-item label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .drawer-item span {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-missing {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge-outdated {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .badge-modern {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .chevron {
+            transition: transform 0.2s;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Lead Finder & Pipeline CRM</h1>
+        <p>Google Maps Deep Scraper & Lead Management Dashboard</p>
+    </header>
+
+    <!-- Metrics Bar -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span>Total Saved Leads</span>
+            <h2 id="metric-total">0</h2>
+        </div>
+        <div class="metric-card">
+            <span>No Website Target</span>
+            <h2 id="metric-missing" style="color: var(--danger);">0</h2>
+        </div>
+        <div class="metric-card">
+            <span>Outdated Sites</span>
+            <h2 id="metric-outdated" style="color: var(--warning);">0</h2>
+        </div>
+        <div class="metric-card">
+            <span>Closed Clients</span>
+            <h2 id="metric-closed" style="color: var(--success);">0</h2>
+        </div>
+    </div>
+
+    <!-- Search Setup Card -->
+    <div class="card">
+        <div class="search-grid">
+            <input type="text" id="businessType" placeholder="Business Type / Keyword (e.g. Clothing Store, Dentist)" />
+            <input type="text" id="location" placeholder="City or District (e.g. Karachi, Miami FL)" />
+            <label class="checkbox-label"><input type="checkbox" id="useCurrentLocation"
+                    onchange="toggleLocationInput(this)"> Near Me</label>
+            <button class="btn-primary" onclick="startScrape()">Run Scraper</button>
+        </div>
+        <div id="status-log" class="status-log" style="display: none;"></div>
+    </div>
+
+    <!-- Pipeline Filters & Expandable Accordion List -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <h2>Leads Directory</h2>
+            <select id="filterStatus" style="width: 200px;" onchange="applyFilters()">
+                <option value="ALL">All Statuses</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Closed">Closed</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+
+        <div id="lead-container" class="lead-accordion"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let globalLeads = [];
+
+        function toggleLocationInput(checkbox) {
+            document.getElementById('location').disabled = checkbox.checked;
+            if (checkbox.checked) document.getElementById('location').value = '';
+        }
+
+        socket.on('progress', (msg) => {
+            const log = document.getElementById('status-log');
+            log.style.display = 'inline-block';
+            log.innerText = `Status: ${msg}`;
+        });
+
+        socket.on('scrape-complete', (leads) => {
+            document.getElementById('status-log').innerText = 'Scraping task complete!';
+            globalLeads = leads;
+            renderLeads(leads);
+        });
+
+        function startScrape() {
+            const businessType = document.getElementById('businessType').value;
+            const location = document.getElementById('location').value;
+            const useCurrentLocation = document.getElementById('useCurrentLocation').checked;
+
+            if (!businessType) return alert('Enter a business query!');
+            if (!useCurrentLocation && !location) return alert('Enter a location or select "Near Me"!');
+
+            socket.emit('start-scrape', { businessType, location, useCurrentLocation, maxResults: 10 });
+        }
+
+        async function loadLeads() {
+            const res = await fetch('/api/leads');
+            globalLeads = await res.json();
+            renderLeads(globalLeads);
+        }
+
+        function updateMetrics(leads) {
+            document.getElementById('metric-total').innerText = leads.length;
+            document.getElementById('metric-missing').innerText = leads.filter(l => l.siteStatus === 'Missing').length;
+            document.getElementById('metric-outdated').innerText = leads.filter(l => l.siteStatus.includes('Outdated')).length;
+            document.getElementById('metric-closed').innerText = leads.filter(l => l.status === 'Closed').length;
+        }
+
+        function toggleCard(cardId, event) {
+            // Don't expand card if user changes dropdown
+            if (event.target.tagName === 'SELECT' || event.target.tagName === 'A' || event.target.tagName === 'OPTION') return;
+            const card = document.getElementById(`card-${cardId}`);
+            card.classList.toggle('open');
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            let filtered = globalLeads;
+            if (statusFilter !== 'ALL') filtered = filtered.filter(l => l.status === statusFilter);
+            renderLeads(filtered, false);
+        }
+
+        function renderLeads(leads, shouldUpdateMetrics = true) {
+            if (shouldUpdateMetrics) updateMetrics(globalLeads);
+            const container = document.getElementById('lead-container');
+            container.innerHTML = '';
+
+            leads.forEach(lead => {
+                let badgeClass = 'badge-modern';
+                if (lead.siteStatus === 'Missing') badgeClass = 'badge-missing';
+                if (lead.siteStatus.includes('Outdated') || lead.siteStatus.includes('Insecure')) badgeClass = 'badge-outdated';
+
+                const card = document.createElement('div');
+                card.className = 'lead-card';
+                card.id = `card-${lead.id}`;
+
+                card.innerHTML = `
+          <div class="lead-header" onclick="toggleCard('${lead.id}', event)">
+            <div>
+              <div class="shop-title">${lead.shopName}</div>
+              <div class="shop-cat">${lead.category} • ⭐ ${lead.rating} (${lead.reviews} reviews)</div>
+            </div>
+            <div>📞 ${lead.phone}</div>
+            <div><span class="badge ${badgeClass}">${lead.siteStatus}</span></div>
+            <div><strong>${lead.opportunity}</strong></div>
+            <div>
+              <select onchange="updateLead('${lead.id}', this.value)">
+                <option value="New" ${lead.status === 'New' ? 'selected' : ''}>New</option>
+                <option value="Contacted" ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                <option value="Closed" ${lead.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                <option value="Rejected" ${lead.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+              </select>
+            </div>
+            <div class="chevron">▼</div>
+          </div>
+          
+          <div class="lead-drawer">
+            <div class="drawer-grid">
+              <div class="drawer-item">
+                <label>Owner / Manager</label>
+                <span>${lead.ownerName}</span>
+              </div>
+              <div class="drawer-item">
+                <label>Full Address</label>
+                <span>${lead.address}</span>
+              </div>
+              <div class="drawer-item">
+                <label>Operating Hours</label>
+                <span>${lead.openingHours}</span>
+              </div>
+              <div class="drawer-item">
+                <label>Detected Web Stack</label>
+                <span>${lead.techStack}</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:16px; border-top: 1px solid #E2E8F0; padding-top: 12px; margin-top:8px;">
+              ${lead.website !== 'None' ? `<a href="${lead.website}" class="btn-link" target="_blank">🌐 Open Website</a>` : '<span style="color:#94A3B8; font-size:13px;">No Website Attached</span>'}
+              <a href="${lead.mapsUrl}" class="btn-link" target="_blank">🗺️ Open Official Google Maps Listing</a>
+            </div>
+          </div>
+        `;
+                container.appendChild(card);
+            });
+        }
+
+        async function updateLead(id, status) {
+            await fetch('/api/leads/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status })
+            });
+            const lead = globalLeads.find(l => l.id == id);
+            if (lead) lead.status = status;
+            updateMetrics(globalLeads);
+        }
+
+        loadLeads();
+    </script>
+</body>
+
+</html>
