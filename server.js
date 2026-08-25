@@ -13,61 +13,239 @@ const io = new Server(server);
 
 const CSV_FILE = path.join(__dirname, 'leads.csv');
 
+const CSV_FIELDS = [
+    'id',
+    'shopName',
+    'category',
+    'ownerName',
+    'rating',
+    'reviews',
+    'phone',
+    'email',
+    'socials',
+    'address',
+    'openingHours',
+    'website',
+    'mapsUrl',
+    'siteStatus',
+    'opportunity',
+    'techStack',
+    'searchQuery',
+    'status',
+    'notes',
+    'createdAt'
+];
+
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Helper: Read CSV
+// Helper: Read and Normalize CSV
 function readLeads() {
     return new Promise((resolve) => {
         if (!fs.existsSync(CSV_FILE)) return resolve([]);
         const leads = [];
         fs.createReadStream(CSV_FILE)
             .pipe(csvParser())
-            .on('data', (data) => leads.push(data))
-            .on('end', () => resolve(leads));
+            .on('data', (raw) => {
+                // Normalize and handle legacy field names
+                const shopName = raw.shopName || raw.name || 'Local Business';
+                if (!shopName || shopName.trim() === '') return;
+
+                leads.push({
+                    id: raw.id || String(Date.now() + Math.random()),
+                    shopName: shopName === 'Results' ? (raw.category || 'Local Business') : shopName,
+                    category: raw.category || 'Local Business',
+                    ownerName: raw.ownerName || 'Not Listed',
+                    rating: raw.rating || 'N/A',
+                    reviews: raw.reviews || '0',
+                    phone: raw.phone || 'N/A',
+                    email: raw.email || 'None',
+                    socials: raw.socials || '{}',
+                    address: raw.address || 'N/A',
+                    openingHours: raw.openingHours || 'Not Specified',
+                    website: raw.website || 'None',
+                    mapsUrl: raw.mapsUrl || '',
+                    siteStatus: raw.siteStatus || 'Missing',
+                    opportunity: raw.opportunity || 'Pitch Web Development',
+                    techStack: raw.techStack || 'None',
+                    searchQuery: raw.searchQuery || 'Default Search',
+                    status: raw.status || 'New',
+                    notes: raw.notes || '',
+                    createdAt: raw.createdAt || new Date().toISOString()
+                });
+            })
+            .on('end', () => resolve(leads))
+            .on('error', (err) => {
+                console.error('CSV Read Error:', err);
+                resolve([]);
+            });
     });
 }
 
-// Helper: Save Leads to CSV
+// Helper: Save Leads to CSV safely
 function saveLeads(leads) {
-    const json2csv = new Parser();
-    const csv = json2csv.parse(leads);
-    fs.writeFileSync(CSV_FILE, csv);
+    try {
+        if (!leads || leads.length === 0) {
+            const header = CSV_FIELDS.map(f => `"${f}"`).join(',') + '\n';
+            fs.writeFileSync(CSV_FILE, header, 'utf8');
+            return;
+        }
+        const json2csv = new Parser({ fields: CSV_FIELDS });
+        const csv = json2csv.parse(leads);
+        fs.writeFileSync(CSV_FILE, csv, 'utf8');
+    } catch (err) {
+        console.error('Error saving CSV:', err);
+    }
 }
 
-// API Routes
+// API: Get All Leads
 app.get('/api/leads', async (req, res) => {
     const leads = await readLeads();
     res.json(leads);
 });
 
+// API: Update Lead Status & Notes
 app.post('/api/leads/update', async (req, res) => {
     const { id, status, notes } = req.body;
     let leads = await readLeads();
-    leads = leads.map(l => l.id == id ? { ...l, status, notes } : l);
+    leads = leads.map(l => {
+        if (String(l.id) === String(id)) {
+            return {
+                ...l,
+                status: status !== undefined ? status : l.status,
+                notes: notes !== undefined ? notes : l.notes
+            };
+        }
+        return l;
+    });
     saveLeads(leads);
     res.json({ success: true });
 });
 
-// Socket Connection for Real-Time Scrape Updates
+// API: Delete Single Lead
+app.post('/api/leads/delete', async (req, res) => {
+    const { id } = req.body;
+    let leads = await readLeads();
+    leads = leads.filter(l => String(l.id) !== String(id));
+    saveLeads(leads);
+    res.json({ success: true });
+});
+
+// API: Clear Leads (All or by specific Search Query)
+app.post('/api/leads/clear', async (req, res) => {
+    const { query } = req.body;
+    let leads = await readLeads();
+    if (query && query !== 'ALL') {
+        leads = leads.filter(l => l.searchQuery !== query);
+    } else {
+        leads = [];
+    }
+    saveLeads(leads);
+    res.json({ success: true });
+});
+
+// API: Export Leads to Full CSV Download
+app.get('/api/leads/export', async (req, res) => {
+    const { query, status } = req.query;
+    let leads = await readLeads();
+
+    if (query && query !== 'ALL') {
+        leads = leads.filter(l => l.searchQuery === query);
+    }
+    if (status && status !== 'ALL') {
+        leads = leads.filter(l => l.status === status);
+    }
+
+    const json2csv = new Parser({ fields: CSV_FIELDS });
+    const csv = leads.length > 0 ? json2csv.parse(leads) : CSV_FIELDS.map(f => `"${f}"`).join(',') + '\n';
+
+    const filename = `leads_${query ? query.replace(/[^a-zA-Z0-9_-]/g, '_') : 'all'}_${Date.now()}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+});
+
+// API: Export Targeted Cold Outreach CSV (Owner Name, Company Name, Phone Number, Email)
+app.get('/api/leads/export-outreach', async (req, res) => {
+    const { query, status, onlyWithEmail } = req.query;
+    let leads = await readLeads();
+
+    if (query && query !== 'ALL') {
+        leads = leads.filter(l => l.searchQuery === query);
+    }
+    if (status && status !== 'ALL') {
+        leads = leads.filter(l => l.status === status);
+    }
+    if (onlyWithEmail === 'true') {
+        leads = leads.filter(l => l.email && l.email !== 'None' && l.email.includes('@'));
+    }
+
+    const outreachFields = ['Owner Name', 'Company Name', 'Phone Number', 'Email'];
+    const outreachData = leads.map(l => ({
+        'Owner Name': l.ownerName && l.ownerName !== 'Not Listed' ? l.ownerName : 'Business Owner',
+        'Company Name': l.shopName || 'Local Business',
+        'Phone Number': l.phone && l.phone !== 'N/A' ? l.phone : '',
+        'Email': l.email && l.email !== 'None' ? l.email : ''
+    }));
+
+    const json2csv = new Parser({ fields: outreachFields });
+    const csv = outreachData.length > 0 ? json2csv.parse(outreachData) : outreachFields.map(f => `"${f}"`).join(',') + '\n';
+
+    const filename = `outreach_${query ? query.replace(/[^a-zA-Z0-9_-]/g, '_') : 'all'}_${Date.now()}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+});
+
+// Socket Connection for Real-Time Scrape Updates & Live Streaming
 io.on('connection', (socket) => {
-    socket.on('start-scrape', async (query) => {
+    socket.on('start-scrape', async (options) => {
         try {
-            const newLeads = await scrapeGoogleMaps(query, (msg) => {
-                socket.emit('progress', msg);
-            });
+            const { businessType, location, useCurrentLocation } = options;
+            const queryName = useCurrentLocation ? `${businessType} (Near Me)` : (location ? `${businessType} in ${location}` : businessType);
+
+            socket.emit('scrape-started', { query: queryName });
+
+            const newLeads = await scrapeGoogleMaps(
+                options,
+                (progressMsg) => {
+                    socket.emit('progress', progressMsg);
+                },
+                (singleLead) => {
+                    socket.emit('lead-stream', singleLead);
+                }
+            );
 
             const existingLeads = await readLeads();
-            const combined = [...existingLeads, ...newLeads];
+
+            // Deduplicate incoming leads against existing dataset
+            const existingMap = new Set(existingLeads.map(l => l.mapsUrl || `${l.shopName}_${l.phone}`));
+            const uniqueNewLeads = [];
+
+            for (const lead of newLeads) {
+                const key = lead.mapsUrl || `${lead.shopName}_${lead.phone}`;
+                if (!existingMap.has(key)) {
+                    uniqueNewLeads.push(lead);
+                    existingMap.add(key);
+                }
+            }
+
+            const combined = [...uniqueNewLeads, ...existingLeads];
             saveLeads(combined);
 
-            socket.emit('scrape-complete', combined);
+            socket.emit('scrape-complete', {
+                allLeads: combined,
+                newLeads: uniqueNewLeads,
+                query: queryName
+            });
         } catch (err) {
+            console.error('Scrape execution error:', err);
             socket.emit('progress', `Error: ${err.message}`);
         }
     });
 });
 
-server.listen(3000, () => {
-    console.log(' Dashboard live at: http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`🚀 Lead Finder Dashboard live at: http://localhost:${PORT}`);
 });

@@ -4,145 +4,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Finder & Pipeline Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Lead Finder & Pipeline CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2B68F6;
-            --primary-hover: #1E51D3;
-            --bg-surface: #F4F7FC;
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --secondary: #6366F1;
+            --bg-page: #F8FAFC;
             --card-bg: #FFFFFF;
             --text-main: #0F172A;
             --text-muted: #64748B;
+            --text-subtle: #94A3B8;
             --border-color: #E2E8F0;
+            --border-focus: #3B82F6;
             --success: #10B981;
+            --success-bg: #ECFDF5;
             --warning: #F59E0B;
+            --warning-bg: #FFFBEB;
             --danger: #EF4444;
+            --danger-bg: #FEF2F2;
+            --purple: #8B5CF6;
+            --purple-bg: #F5F3FF;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--bg-surface);
+            background-color: var(--bg-page);
             color: var(--text-main);
-            padding: 24px;
+            padding: 28px 32px;
+            min-height: 100vh;
         }
 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Top Header */
         header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
         }
 
         header h1 {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             color: var(--text-main);
+            letter-spacing: -0.02em;
         }
 
         header p {
             color: var(--text-muted);
-            font-size: 14px;
-            margin-top: 4px;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Metric Cards */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
 
         .metric-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
+            padding: 18px 20px;
+            border-radius: var(--radius-lg);
             border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.15s ease;
         }
 
-        .metric-card span {
-            font-size: 12px;
-            font-weight: 600;
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-icon-box {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .metric-info span {
+            font-size: 11px;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .metric-card h2 {
-            font-size: 26px;
-            font-weight: 700;
-            margin-top: 6px;
+        .metric-info h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-top: 2px;
+            letter-spacing: -0.02em;
         }
 
-        /* Search Input Card */
+        /* Search Console Card */
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             border: 1px solid var(--border-color);
-            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            padding: 20px 24px;
             margin-bottom: 24px;
         }
 
         .search-grid {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 140px;
+            grid-template-columns: 2.5fr 2fr 130px 100px 150px;
             gap: 12px;
             align-items: center;
+        }
+
+        @media (max-width: 1024px) {
+            .search-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            position: relative;
         }
 
         input[type="text"],
         select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 11px 14px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
             outline: none;
+            background: #FAFAFA;
+            color: var(--text-main);
+            transition: all 0.2s;
         }
 
         input[type="text"]:focus,
         select:focus {
-            border-color: var(--primary);
+            background: white;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
         .checkbox-label {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        button.btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        button.btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .status-log {
-            margin-top: 14px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--primary);
-            background: #EFF6FF;
-            padding: 10px 14px;
-            border-radius: 6px;
-            display: inline-block;
+            cursor: pointer;
+            color: var(--text-main);
+            user-select: none;
         }
 
-        /* Collapsible Lead Accordion */
+        .checkbox-label input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #F1F5F9;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+
+        .btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid #FECACA;
+        }
+
+        .btn-danger:hover {
+            background: #FEE2E2;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        /* Scraper Progress Area */
+        .progress-box {
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: #F0F7FF;
+            border: 1px solid #BFDBFE;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1E40AF;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #93C5FD;
+            border-top-color: #1D4ED8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tabs System */
+        .tabs-header-wrapper {
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow-x: auto;
+            gap: 8px;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: #F1F5F9;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .tab-badge {
+            background: #E2E8F0;
+            color: var(--text-muted);
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .tab-btn.active .tab-badge {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-close {
+            font-size: 14px;
+            line-height: 1;
+            color: var(--text-subtle);
+            border-radius: 50%;
+            padding: 2px;
+        }
+
+        .tab-close:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Filter Toolbar */
+        .filter-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .search-input-box {
+            position: relative;
+            min-width: 260px;
+            flex: 1;
+        }
+
+        /* Lead Card List */
         .lead-accordion {
             display: flex;
             flex-direction: column;
@@ -152,41 +430,177 @@
         .lead-card {
             background: white;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         .lead-card:hover {
             border-color: #CBD5E1;
+            box-shadow: var(--shadow-md);
         }
 
         .lead-header {
             display: grid;
-            grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1fr auto;
-            gap: 12px;
-            padding: 16px;
+            grid-template-columns: 2.5fr 1.6fr 1.6fr 1.6fr 140px auto;
+            gap: 14px;
+            padding: 16px 20px;
             align-items: center;
             cursor: pointer;
             user-select: none;
+            background: white;
+        }
+
+        @media (max-width: 1024px) {
+            .lead-header {
+                grid-template-columns: 2fr 1fr 1fr auto;
+            }
+            .lead-header .col-opportunity,
+            .lead-header .col-phone {
+                display: none;
+            }
+        }
+
+        .shop-title-box {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
         }
 
         .shop-title {
             font-weight: 700;
             font-size: 15px;
             color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .shop-cat {
             font-size: 12px;
             color: var(--text-muted);
-            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        /* Expand Details Drawer */
+        .rating-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #B45309;
+            background: #FEF3C7;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .contact-col {
+            font-size: 13px;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .contact-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .email-pill {
+            font-size: 11.5px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            background: var(--primary-light);
+            padding: 2px 6px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+        }
+
+        .badge-missing {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        .badge-outdated {
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FDE68A;
+        }
+
+        .badge-modern {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .badge-insecure {
+            background: #FEE2E2;
+            color: #B91C1C;
+            border: 1px solid #FCA5A5;
+        }
+
+        .opportunity-text {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.3;
+        }
+
+        .status-select {
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #F8FAFC;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .status-select.status-New { color: #2563EB; background: #EFF6FF; border-color: #BFDBFE; }
+        .status-select.status-Contacted { color: #D97706; background: #FFFBEB; border-color: #FDE68A; }
+        .status-select.status-Closed { color: #059669; background: #ECFDF5; border-color: #A7F3D0; }
+        .status-select.status-Rejected { color: #DC2626; background: #FEF2F2; border-color: #FECACA; }
+
+        .chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .lead-card.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Lead Drawer Details */
         .lead-drawer {
             display: none;
-            padding: 16px 20px;
+            padding: 20px 24px;
             background: #F8FAFC;
             border-top: 1px solid var(--border-color);
         }
@@ -195,19 +609,15 @@
             display: block;
         }
 
-        .lead-card.open .chevron {
-            transform: rotate(180deg);
-        }
-
-        .drawer-grid {
+        .drawer-top-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .drawer-item {
-            font-size: 13px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
         }
 
         .drawer-item label {
@@ -217,245 +627,1200 @@
             text-transform: uppercase;
             display: block;
             margin-bottom: 4px;
+            letter-spacing: 0.04em;
         }
 
         .drawer-item span {
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--text-main);
         }
 
-        /* Badges */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
+        /* Outreach Action Toolbar */
+        .outreach-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            box-shadow: 0 2px 4px rgba(37, 211, 102, 0.25);
+        }
+
+        .btn-whatsapp:hover {
+            background: #1EBE5D;
+            color: white;
+        }
+
+        .btn-email {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-email:hover {
+            background: #2563EB;
+        }
+
+        /* Pitch Generator Box */
+        .pitch-box {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .pitch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .pitch-header h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pitch-content {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #334155;
+            background: #F8FAFC;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            font-style: normal;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            margin-bottom: 16px;
+        }
+
+        .notes-section label {
             font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-missing {
-            background: #FEE2E2;
-            color: #991B1B;
-        }
-
-        .badge-outdated {
-            background: #FEF3C7;
-            color: #92400E;
-        }
-
-        .badge-modern {
-            background: #D1FAE5;
-            color: #065F46;
-        }
-
-        .chevron {
-            transition: transform 0.2s;
-            font-size: 12px;
+            font-weight: 700;
             color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            height: 70px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            resize: vertical;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .notes-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Drawer Footer Links */
+        .drawer-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .links-group {
+            display: flex;
+            gap: 14px;
+            align-items: center;
         }
 
         .btn-link {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .btn-link:hover {
             text-decoration: underline;
+        }
+
+        /* Social Icons */
+        .social-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #F1F5F9;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        .social-pill:hover {
+            background: #E2E8F0;
+            color: var(--primary);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: #1E293B;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.25s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 10px;
+        }
+
+        /* Draft Mail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            width: 720px;
+            max-width: 92vw;
+            max-height: 88vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideIn 0.25s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(30px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: #F8FAFC;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border-color: #FECACA;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .mail-field {
+            margin-bottom: 16px;
+        }
+
+        .mail-field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .mail-field input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13.5px;
+            outline: none;
+            background: #FAFAFA;
+            color: var(--text-main);
+        }
+
+        .mail-field input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            background: white;
+        }
+
+        .mail-body-area {
+            width: 100%;
+            min-height: 300px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            outline: none;
+            resize: vertical;
+            background: #FAFAFA;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .mail-body-area:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            background: white;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            background: #F8FAFC;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-footer .footer-hint {
+            font-size: 12px;
+            color: var(--text-subtle);
+        }
+
+        .btn-gmail {
+            background: linear-gradient(135deg, #EA4335 0%, #D93025 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(234, 67, 53, 0.25);
+        }
+
+        .btn-gmail:hover {
+            background: linear-gradient(135deg, #D93025 0%, #C62B1E 100%);
+            box-shadow: 0 4px 8px rgba(234, 67, 53, 0.35);
+        }
+
+        .btn-draft {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.25);
+        }
+
+        .btn-draft:hover {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
         }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>Lead Finder & Pipeline CRM</h1>
-        <p>Google Maps Deep Scraper & Lead Management Dashboard</p>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="brand-title">
+                <div class="brand-icon">⚡</div>
+                <div>
+                    <h1>Lead Finder & Outreach CRM</h1>
+                    <p>High-Precision Google Maps Intelligence, Deep Email & Tech Scraper, Sales Pipeline</p>
+                </div>
+            </div>
 
-    <!-- Metrics Bar -->
-    <div class="metrics-grid">
-        <div class="metric-card">
-            <span>Total Saved Leads</span>
-            <h2 id="metric-total">0</h2>
+            <div class="header-actions">
+                <button class="btn btn-primary btn-sm" onclick="exportOutreachCSV()" title="Exports clean CSV with Owner Name, Company Name, Phone Number, and Email">
+                    ✉️ Export Outreach CSV (Owner, Company, Phone, Email)
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="exportCSV()" title="Exports all lead columns">
+                    📥 Export Full CSV
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="clearCurrentTabLeads()">
+                    🗑️ Clear Tab
+                </button>
+            </div>
+        </header>
+
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon-box" style="background: var(--primary-light); color: var(--primary);">📊</div>
+                <div class="metric-info">
+                    <span>Total Saved Leads</span>
+                    <h2 id="metric-total">0</h2>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon-box" style="background: var(--danger-bg); color: var(--danger);">🚫</div>
+                <div class="metric-info">
+                    <span>No Website Targets</span>
+                    <h2 id="metric-missing" style="color: var(--danger);">0</h2>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon-box" style="background: var(--warning-bg); color: var(--warning);">⚠️</div>
+                <div class="metric-info">
+                    <span>Outdated / Insecure</span>
+                    <h2 id="metric-outdated" style="color: var(--warning);">0</h2>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon-box" style="background: var(--purple-bg); color: var(--purple);">✉️</div>
+                <div class="metric-info">
+                    <span>Emails Extracted</span>
+                    <h2 id="metric-emails" style="color: var(--purple);">0</h2>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon-box" style="background: var(--success-bg); color: var(--success);">🎯</div>
+                <div class="metric-info">
+                    <span>Closed Deals</span>
+                    <h2 id="metric-closed" style="color: var(--success);">0</h2>
+                </div>
+            </div>
         </div>
-        <div class="metric-card">
-            <span>No Website Target</span>
-            <h2 id="metric-missing" style="color: var(--danger);">0</h2>
+
+        <!-- Search Console Card -->
+        <div class="card">
+            <div class="search-grid">
+                <div class="input-group">
+                    <input type="text" id="businessType" placeholder="Business Type / Niche (e.g. Cloth House, Dentist, Gym)" />
+                </div>
+                <div class="input-group">
+                    <input type="text" id="location" placeholder="City or Area (e.g. Karachi, Tariq Road, London)" />
+                </div>
+                <div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="useCurrentLocation" onchange="toggleLocationInput(this)">
+                        📍 Near Me
+                    </label>
+                </div>
+                <div>
+                    <select id="maxResults">
+                        <option value="5">5 leads</option>
+                        <option value="10" selected>10 leads</option>
+                        <option value="20">20 leads</option>
+                        <option value="50">50 leads</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="btn-run" onclick="startScrape()" style="width: 100%;">
+                        <span>⚡ Run Scraper</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrape Progress Box -->
+            <div id="progress-box" class="progress-box" style="display: none;">
+                <div class="progress-header">
+                    <span id="progress-msg"><span class="spinner"></span> Initializing Google Maps engine...</span>
+                    <span id="progress-count" class="tab-badge" style="background: #DBEAFE; color: #1E40AF;">0 leads collected</span>
+                </div>
+            </div>
         </div>
-        <div class="metric-card">
-            <span>Outdated Sites</span>
-            <h2 id="metric-outdated" style="color: var(--warning);">0</h2>
+
+        <!-- Dynamic Search Results Tabs -->
+        <div class="tabs-header-wrapper">
+            <div class="tabs-container" id="tabs-container">
+                <!-- Dynamically populated tabs -->
+                <button class="tab-btn active" onclick="switchTab('ALL')">
+                    📁 All Leads <span class="tab-badge" id="tab-badge-ALL">0</span>
+                </button>
+            </div>
         </div>
-        <div class="metric-card">
-            <span>Closed Clients</span>
-            <h2 id="metric-closed" style="color: var(--success);">0</h2>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="filter-toolbar">
+            <div class="filter-group">
+                <div class="search-input-box">
+                    <input type="text" id="filterKeyword" placeholder="🔍 Search leads by name, phone, email, address..." oninput="applyFilters()">
+                </div>
+
+                <select id="filterStatus" style="width: 160px;" onchange="applyFilters()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="New">Status: New</option>
+                    <option value="Contacted">Status: Contacted</option>
+                    <option value="Closed">Status: Closed</option>
+                    <option value="Rejected">Status: Rejected</option>
+                </select>
+
+                <select id="filterOpportunity" style="width: 200px;" onchange="applyFilters()">
+                    <option value="ALL">All Opportunities</option>
+                    <option value="Missing">No Website (High Priority)</option>
+                    <option value="Insecure">Insecure / HTTP</option>
+                    <option value="Outdated">Outdated Website</option>
+                    <option value="Modern">Modern / Active</option>
+                </select>
+
+                <select id="sortBy" style="width: 170px;" onchange="applyFilters()">
+                    <option value="newest">Sort: Newest First</option>
+                    <option value="rating">Sort: Highest Rating</option>
+                    <option value="reviews">Sort: Most Reviews</option>
+                    <option value="name">Sort: Name (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Leads Accordion Container -->
+        <div id="lead-container" class="lead-accordion">
+            <div class="empty-state">
+                <div style="font-size: 36px;">🔍</div>
+                <h3>No leads in this view yet</h3>
+                <p>Run a search above to discover businesses and stream live results into tabs.</p>
+            </div>
         </div>
     </div>
 
-    <!-- Search Setup Card -->
-    <div class="card">
-        <div class="search-grid">
-            <input type="text" id="businessType" placeholder="Business Type / Keyword (e.g. Clothing Store, Dentist)" />
-            <input type="text" id="location" placeholder="City or District (e.g. Karachi, Miami FL)" />
-            <label class="checkbox-label"><input type="checkbox" id="useCurrentLocation"
-                    onchange="toggleLocationInput(this)"> Near Me</label>
-            <button class="btn-primary" onclick="startScrape()">Run Scraper</button>
+    <!-- Codexz Draft Mail Modal for Salesman -->
+    <div id="draft-mail-modal" class="modal-overlay" onclick="handleModalBackdropClick(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><span>✉️</span> Codexz Sales Email Proposal</h3>
+                <div class="modal-header-actions">
+                    <button class="modal-close" onclick="closeDraftModal()">✕</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="mail-field">
+                    <label>Recipient Email</label>
+                    <input type="text" id="modal-mail-to" placeholder="e.g. client@company.com" />
+                </div>
+                <div class="mail-field">
+                    <label>Subject Line</label>
+                    <input type="text" id="modal-mail-subject" placeholder="Proposal Subject..." />
+                </div>
+                <div class="mail-field">
+                    <label>Codexz Solutions Proposal Body (Editable)</label>
+                    <textarea id="modal-mail-body" class="mail-body-area"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="footer-hint">
+                    🚀 Agency: <strong>Codexz Solution</strong> (codexz-solutions.vercel.app)
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="copyModalSubject()">📋 Copy Subject</button>
+                    <button class="btn btn-secondary btn-sm" onclick="copyModalBody()">📋 Copy Email Body</button>
+                    <button class="btn btn-gmail btn-sm" onclick="openGmailCompose()">
+                        <span style="font-weight: 700;">M</span> Compose in Gmail
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openDefaultMail()">
+                        ✉️ Default Mail
+                    </button>
+                </div>
+            </div>
         </div>
-        <div id="status-log" class="status-log" style="display: none;"></div>
     </div>
 
-    <!-- Pipeline Filters & Expandable Accordion List -->
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-            <h2>Leads Directory</h2>
-            <select id="filterStatus" style="width: 200px;" onchange="applyFilters()">
-                <option value="ALL">All Statuses</option>
-                <option value="New">New</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Closed">Closed</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-        </div>
-
-        <div id="lead-container" class="lead-accordion"></div>
-    </div>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let globalLeads = [];
+        let activeTab = 'ALL';
+        let isScraping = false;
+        let currentScrapeCount = 0;
+
+        function showToast(message, icon = '✅') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
         function toggleLocationInput(checkbox) {
             document.getElementById('location').disabled = checkbox.checked;
             if (checkbox.checked) document.getElementById('location').value = '';
         }
 
-        socket.on('progress', (msg) => {
-            const log = document.getElementById('status-log');
-            log.style.display = 'inline-block';
-            log.innerText = `Status: ${msg}`;
+        // Socket Event Listeners
+        socket.on('scrape-started', (data) => {
+            currentScrapeCount = 0;
+            const progressBox = document.getElementById('progress-box');
+            progressBox.style.display = 'flex';
+            document.getElementById('progress-msg').innerHTML = `<span class="spinner"></span> Scraping "${data.query}"...`;
+            document.getElementById('progress-count').innerText = `0 collected`;
+
+            // Switch to or create new tab
+            ensureTabExists(data.query);
+            switchTab(data.query);
         });
 
-        socket.on('scrape-complete', (leads) => {
-            document.getElementById('status-log').innerText = 'Scraping task complete!';
-            globalLeads = leads;
-            renderLeads(leads);
+        socket.on('progress', (msg) => {
+            const progressBox = document.getElementById('progress-box');
+            progressBox.style.display = 'flex';
+            document.getElementById('progress-msg').innerHTML = `<span class="spinner"></span> ${msg}`;
+        });
+
+        socket.on('lead-stream', (singleLead) => {
+            currentScrapeCount++;
+            document.getElementById('progress-count').innerText = `${currentScrapeCount} collected`;
+            
+            // Add lead if not duplicate
+            const existingIdx = globalLeads.findIndex(l => l.mapsUrl === singleLead.mapsUrl);
+            if (existingIdx === -1) {
+                globalLeads.unshift(singleLead);
+            } else {
+                globalLeads[existingIdx] = singleLead;
+            }
+
+            renderTabs();
+            applyFilters();
+        });
+
+        socket.on('scrape-complete', (data) => {
+            isScraping = false;
+            document.getElementById('btn-run').disabled = false;
+            document.getElementById('btn-run').innerHTML = '<span>⚡ Run Scraper</span>';
+            
+            const progressBox = document.getElementById('progress-box');
+            document.getElementById('progress-msg').innerText = `Scrape complete! Extracted ${data.newLeads ? data.newLeads.length : 0} new leads.`;
+            setTimeout(() => {
+                progressBox.style.display = 'none';
+            }, 5000);
+
+            globalLeads = data.allLeads || globalLeads;
+            renderTabs();
+            applyFilters();
+            showToast(`Scrape finished for ${data.query}!`, '🚀');
         });
 
         function startScrape() {
-            const businessType = document.getElementById('businessType').value;
-            const location = document.getElementById('location').value;
+            if (isScraping) return;
+
+            const businessType = document.getElementById('businessType').value.trim();
+            const location = document.getElementById('location').value.trim();
             const useCurrentLocation = document.getElementById('useCurrentLocation').checked;
+            const maxResults = parseInt(document.getElementById('maxResults').value, 10) || 10;
 
-            if (!businessType) return alert('Enter a business query!');
-            if (!useCurrentLocation && !location) return alert('Enter a location or select "Near Me"!');
+            if (!businessType) {
+                alert('Please enter a business type or keyword (e.g. Cloth House, Dentist)');
+                return;
+            }
+            if (!useCurrentLocation && !location) {
+                alert('Please specify a location or check "Near Me"');
+                return;
+            }
 
-            socket.emit('start-scrape', { businessType, location, useCurrentLocation, maxResults: 10 });
+            isScraping = true;
+            document.getElementById('btn-run').disabled = true;
+            document.getElementById('btn-run').innerHTML = '<span class="spinner"></span> Scraping...';
+
+            const queryName = useCurrentLocation ? `${businessType} (Near Me)` : (location ? `${businessType} in ${location}` : businessType);
+            ensureTabExists(queryName);
+            switchTab(queryName);
+
+            socket.emit('start-scrape', { businessType, location, useCurrentLocation, maxResults });
         }
 
         async function loadLeads() {
-            const res = await fetch('/api/leads');
-            globalLeads = await res.json();
-            renderLeads(globalLeads);
+            try {
+                const res = await fetch('/api/leads');
+                globalLeads = await res.json();
+                renderTabs();
+                applyFilters();
+            } catch (e) {
+                console.error('Failed to load leads:', e);
+            }
         }
 
-        function updateMetrics(leads) {
-            document.getElementById('metric-total').innerText = leads.length;
-            document.getElementById('metric-missing').innerText = leads.filter(l => l.siteStatus === 'Missing').length;
-            document.getElementById('metric-outdated').innerText = leads.filter(l => l.siteStatus.includes('Outdated')).length;
-            document.getElementById('metric-closed').innerText = leads.filter(l => l.status === 'Closed').length;
+        function getDistinctQueries() {
+            const queries = new Set();
+            globalLeads.forEach(l => {
+                if (l.searchQuery && l.searchQuery !== 'Default Search') {
+                    queries.add(l.searchQuery);
+                }
+            });
+            return Array.from(queries);
         }
 
-        function toggleCard(cardId, event) {
-            // Don't expand card if user changes dropdown
-            if (event.target.tagName === 'SELECT' || event.target.tagName === 'A' || event.target.tagName === 'OPTION') return;
-            const card = document.getElementById(`card-${cardId}`);
-            card.classList.toggle('open');
+        function ensureTabExists(queryName) {
+            if (!queryName) return;
+            renderTabs();
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const queries = getDistinctQueries();
+
+            let html = `
+                <button class="tab-btn ${activeTab === 'ALL' ? 'active' : ''}" onclick="switchTab('ALL')">
+                    📁 All Leads <span class="tab-badge" id="tab-badge-ALL">${globalLeads.length}</span>
+                </button>
+            `;
+
+            queries.forEach(query => {
+                const count = globalLeads.filter(l => l.searchQuery === query).length;
+                const isActive = activeTab === query;
+                html += `
+                    <button class="tab-btn ${isActive ? 'active' : ''}" onclick="switchTab('${encodeURIComponent(query)}')">
+                        🏷️ ${escapeHtml(query)} <span class="tab-badge">${count}</span>
+                    </button>
+                `;
+            });
+
+            tabsContainer.innerHTML = html;
+        }
+
+        function switchTab(query) {
+            activeTab = decodeURIComponent(query);
+            renderTabs();
+            applyFilters();
+        }
+
+        function updateMetrics(leadsToCalculate) {
+            document.getElementById('metric-total').innerText = leadsToCalculate.length;
+            document.getElementById('metric-missing').innerText = leadsToCalculate.filter(l => l.siteStatus === 'Missing').length;
+            document.getElementById('metric-outdated').innerText = leadsToCalculate.filter(l => l.siteStatus.includes('Outdated') || l.siteStatus.includes('Insecure')).length;
+            document.getElementById('metric-emails').innerText = leadsToCalculate.filter(l => l.email && l.email !== 'None').length;
+            document.getElementById('metric-closed').innerText = leadsToCalculate.filter(l => l.status === 'Closed').length;
         }
 
         function applyFilters() {
+            const keyword = document.getElementById('filterKeyword').value.toLowerCase().trim();
             const statusFilter = document.getElementById('filterStatus').value;
-            let filtered = globalLeads;
-            if (statusFilter !== 'ALL') filtered = filtered.filter(l => l.status === statusFilter);
-            renderLeads(filtered, false);
+            const oppFilter = document.getElementById('filterOpportunity').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // 1. Filter by Active Tab
+            let filtered = activeTab === 'ALL' 
+                ? [...globalLeads] 
+                : globalLeads.filter(l => l.searchQuery === activeTab);
+
+            // Update metrics for current active tab scope
+            updateMetrics(filtered);
+
+            // 2. Keyword Filter
+            if (keyword) {
+                filtered = filtered.filter(l => 
+                    (l.shopName && l.shopName.toLowerCase().includes(keyword)) ||
+                    (l.phone && l.phone.toLowerCase().includes(keyword)) ||
+                    (l.email && l.email.toLowerCase().includes(keyword)) ||
+                    (l.address && l.address.toLowerCase().includes(keyword)) ||
+                    (l.category && l.category.toLowerCase().includes(keyword))
+                );
+            }
+
+            // 3. Status Filter
+            if (statusFilter !== 'ALL') {
+                filtered = filtered.filter(l => l.status === statusFilter);
+            }
+
+            // 4. Opportunity Filter
+            if (oppFilter !== 'ALL') {
+                filtered = filtered.filter(l => {
+                    if (oppFilter === 'Missing') return l.siteStatus === 'Missing';
+                    if (oppFilter === 'Insecure') return l.siteStatus.includes('Insecure');
+                    if (oppFilter === 'Outdated') return l.siteStatus.includes('Outdated');
+                    if (oppFilter === 'Modern') return l.siteStatus.includes('Modern');
+                    return true;
+                });
+            }
+
+            // 5. Sorting
+            filtered.sort((a, b) => {
+                if (sortBy === 'rating') {
+                    const rA = parseFloat(a.rating) || 0;
+                    const rB = parseFloat(b.rating) || 0;
+                    return rB - rA;
+                } else if (sortBy === 'reviews') {
+                    const revA = parseInt(String(a.reviews).replace(/[^0-9]/g, '') || 0, 10);
+                    const revB = parseInt(String(b.reviews).replace(/[^0-9]/g, '') || 0, 10);
+                    return revB - revA;
+                } else if (sortBy === 'name') {
+                    return (a.shopName || '').localeCompare(b.shopName || '');
+                } else {
+                    // Newest first by id or createdAt
+                    return (b.id || 0) - (a.id || 0);
+                }
+            });
+
+            renderLeadCards(filtered);
         }
 
-        function renderLeads(leads, shouldUpdateMetrics = true) {
-            if (shouldUpdateMetrics) updateMetrics(globalLeads);
+        function generatePitch(lead) {
+            const name = lead.shopName || 'Business Owner';
+            const rating = lead.rating !== 'N/A' ? `${lead.rating}⭐` : 'high';
+            const reviews = lead.reviews && lead.reviews !== '0' ? ` with ${lead.reviews} reviews` : '';
+
+            if (lead.siteStatus === 'Missing') {
+                return `Hi ${name}, I noticed your business has a great presence on Google Maps (${rating}${reviews}), but no official website linked. A mobile-friendly website can help you attract 30-50% more direct customer orders. Would you be open to a quick preview mockup this week?`;
+            } else if (lead.siteStatus.includes('Insecure')) {
+                return `Hi ${name}, I came across your website (${lead.website}) and noticed it is flagged as 'Not Secure' (HTTP/No SSL). This can discourage customers and lower your Google ranking. We can fix and secure it immediately. Open to a quick chat?`;
+            } else if (lead.siteStatus.includes('Outdated')) {
+                return `Hi ${name}, I checked out your website (${lead.website}) and noticed the mobile layout could use a modern redesign to better match your top reputation (${rating}). Would you be interested in a free preview redesign?`;
+            } else {
+                return `Hi ${name}, loved your website (${lead.website})! We specialize in AI WhatsApp chatbots & lead automations that instantly reply to client inquiries 24/7. Would you like a quick 2-minute demo?`;
+            }
+        }
+
+        function renderLeadCards(leads) {
             const container = document.getElementById('lead-container');
             container.innerHTML = '';
 
+            if (leads.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 32px;">🔍</div>
+                        <h3>No leads found</h3>
+                        <p>Try adjusting your search query, status, or opportunity filters.</p>
+                    </div>
+                `;
+                return;
+            }
+
             leads.forEach(lead => {
                 let badgeClass = 'badge-modern';
-                if (lead.siteStatus === 'Missing') badgeClass = 'badge-missing';
-                if (lead.siteStatus.includes('Outdated') || lead.siteStatus.includes('Insecure')) badgeClass = 'badge-outdated';
+                let badgeIcon = '✨';
+                if (lead.siteStatus === 'Missing') { badgeClass = 'badge-missing'; badgeIcon = '🚫'; }
+                else if (lead.siteStatus.includes('Insecure')) { badgeClass = 'badge-insecure'; badgeIcon = '🔒'; }
+                else if (lead.siteStatus.includes('Outdated')) { badgeClass = 'badge-outdated'; badgeIcon = '⚠️'; }
+
+                let socialsObj = {};
+                try {
+                    socialsObj = typeof lead.socials === 'string' ? JSON.parse(lead.socials || '{}') : (lead.socials || {});
+                } catch(e) {}
+
+                const pitchScript = generatePitch(lead);
+                const rawPhone = lead.phone ? lead.phone.replace(/[^0-9]/g, '') : '';
+                const waLink = rawPhone ? `https://wa.me/${rawPhone}?text=${encodeURIComponent(pitchScript)}` : '#';
+                const mailLink = lead.email && lead.email !== 'None' ? `mailto:${lead.email}?subject=${encodeURIComponent(`Website & Growth Proposal for ${lead.shopName}`)}&body=${encodeURIComponent(pitchScript)}` : '#';
 
                 const card = document.createElement('div');
                 card.className = 'lead-card';
                 card.id = `card-${lead.id}`;
 
                 card.innerHTML = `
-          <div class="lead-header" onclick="toggleCard('${lead.id}', event)">
-            <div>
-              <div class="shop-title">${lead.shopName}</div>
-              <div class="shop-cat">${lead.category} • ⭐ ${lead.rating} (${lead.reviews} reviews)</div>
-            </div>
-            <div>📞 ${lead.phone}</div>
-            <div><span class="badge ${badgeClass}">${lead.siteStatus}</span></div>
-            <div><strong>${lead.opportunity}</strong></div>
-            <div>
-              <select onchange="updateLead('${lead.id}', this.value)">
-                <option value="New" ${lead.status === 'New' ? 'selected' : ''}>New</option>
-                <option value="Contacted" ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
-                <option value="Closed" ${lead.status === 'Closed' ? 'selected' : ''}>Closed</option>
-                <option value="Rejected" ${lead.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-              </select>
-            </div>
-            <div class="chevron">▼</div>
-          </div>
-          
-          <div class="lead-drawer">
-            <div class="drawer-grid">
-              <div class="drawer-item">
-                <label>Owner / Manager</label>
-                <span>${lead.ownerName}</span>
-              </div>
-              <div class="drawer-item">
-                <label>Full Address</label>
-                <span>${lead.address}</span>
-              </div>
-              <div class="drawer-item">
-                <label>Operating Hours</label>
-                <span>${lead.openingHours}</span>
-              </div>
-              <div class="drawer-item">
-                <label>Detected Web Stack</label>
-                <span>${lead.techStack}</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:16px; border-top: 1px solid #E2E8F0; padding-top: 12px; margin-top:8px;">
-              ${lead.website !== 'None' ? `<a href="${lead.website}" class="btn-link" target="_blank">🌐 Open Website</a>` : '<span style="color:#94A3B8; font-size:13px;">No Website Attached</span>'}
-              <a href="${lead.mapsUrl}" class="btn-link" target="_blank">🗺️ Open Official Google Maps Listing</a>
-            </div>
-          </div>
-        `;
+                    <div class="lead-header" onclick="toggleCard('${lead.id}', event)">
+                        <div class="shop-title-box">
+                            <div class="shop-title">
+                                ${escapeHtml(lead.shopName)}
+                            </div>
+                            <div class="shop-cat">
+                                <span>${escapeHtml(lead.category)}</span>
+                                ${lead.rating !== 'N/A' ? `<span class="rating-pill">⭐ ${lead.rating} (${lead.reviews})</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="contact-col col-phone">
+                            <div class="contact-pill">📞 ${escapeHtml(lead.phone)}</div>
+                            ${lead.email && lead.email !== 'None' ? `<div class="email-pill">✉️ ${escapeHtml(lead.email)}</div>` : ''}
+                        </div>
+
+                        <div>
+                            <span class="badge ${badgeClass}">${badgeIcon} ${escapeHtml(lead.siteStatus)}</span>
+                        </div>
+
+                        <div class="col-opportunity">
+                            <div class="opportunity-text">${escapeHtml(lead.opportunity)}</div>
+                        </div>
+
+                        <div>
+                            <select class="status-select status-${lead.status}" onchange="updateLeadStatus('${lead.id}', this.value, event)">
+                                <option value="New" ${lead.status === 'New' ? 'selected' : ''}>New</option>
+                                <option value="Contacted" ${lead.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                                <option value="Closed" ${lead.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                                <option value="Rejected" ${lead.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div class="chevron">▼</div>
+                    </div>
+
+                    <div class="lead-drawer">
+                        <!-- Outreach Bar -->
+                        <div class="outreach-bar">
+                            <button class="btn btn-draft btn-sm" onclick="openDraftModal('${lead.id}')">✉️ Draft Mail (Codexz)</button>
+                            ${rawPhone ? `<a href="${waLink}" target="_blank" class="btn btn-whatsapp btn-sm">💬 WhatsApp Pitch</a>` : ''}
+                            ${lead.email && lead.email !== 'None' ? `<a href="${mailLink}" target="_blank" class="btn btn-email btn-sm">✉️ Direct Mail</a>` : ''}
+                            ${lead.phone && lead.phone !== 'N/A' ? `<a href="tel:${lead.phone}" class="btn btn-secondary btn-sm">📞 Call Direct</a>` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="copyPitch('${lead.id}')">📋 Copy Pitch</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteLead('${lead.id}')" style="margin-left: auto;">🗑️ Delete</button>
+                        </div>
+
+                        <!-- Top Information Details -->
+                        <div class="drawer-top-grid">
+                            <div class="drawer-item">
+                                <label>👤 Owner / Manager</label>
+                                <span>${escapeHtml(lead.ownerName || 'Not Listed')}</span>
+                            </div>
+                            <div class="drawer-item">
+                                <label>📍 Address</label>
+                                <span>${escapeHtml(lead.address || 'N/A')}</span>
+                            </div>
+                            <div class="drawer-item">
+                                <label>🕒 Operating Hours</label>
+                                <span>${escapeHtml(lead.openingHours || 'Not Specified')}</span>
+                            </div>
+                            <div class="drawer-item">
+                                <label>💻 Detected Web Stack</label>
+                                <span>${escapeHtml(lead.techStack || 'None')}</span>
+                            </div>
+                            <div class="drawer-item">
+                                <label>📱 Detected Socials</label>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                                    ${socialsObj.instagram ? `<a href="${socialsObj.instagram}" target="_blank" class="social-pill">📸 Instagram</a>` : ''}
+                                    ${socialsObj.facebook ? `<a href="${socialsObj.facebook}" target="_blank" class="social-pill">📘 Facebook</a>` : ''}
+                                    ${socialsObj.linkedin ? `<a href="${socialsObj.linkedin}" target="_blank" class="social-pill">💼 LinkedIn</a>` : ''}
+                                    ${socialsObj.whatsapp ? `<a href="${socialsObj.whatsapp}" target="_blank" class="social-pill">💬 WhatsApp</a>` : ''}
+                                    ${!socialsObj.instagram && !socialsObj.facebook && !socialsObj.linkedin && !socialsObj.whatsapp ? '<span style="color:#94A3B8; font-size:12px;">None Found</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cold Pitch Script Box -->
+                        <div class="pitch-box">
+                            <div class="pitch-header">
+                                <h4>⚡ Tailored Cold Outreach Message</h4>
+                                <button class="btn btn-secondary btn-sm" onclick="copyPitch('${lead.id}')">Copy Script</button>
+                            </div>
+                            <div class="pitch-content" id="pitch-text-${lead.id}">${escapeHtml(pitchScript)}</div>
+                        </div>
+
+                        <!-- CRM Notes Area -->
+                        <div class="notes-section">
+                            <label>📝 Follow-up Notes & Log (Auto-saved)</label>
+                            <textarea class="notes-textarea" placeholder="Add notes (e.g. Spoke to manager, requested demo on Friday)..." onblur="updateLeadNotes('${lead.id}', this.value)">${escapeHtml(lead.notes || '')}</textarea>
+                        </div>
+
+                        <!-- Links Footer -->
+                        <div class="drawer-footer">
+                            <div class="links-group">
+                                ${lead.website && lead.website !== 'None' ? `<a href="${lead.website}" class="btn-link" target="_blank">🌐 Open Website</a>` : '<span style="color:#94A3B8; font-size:12px;">No Website Attached</span>'}
+                                <a href="${lead.mapsUrl}" class="btn-link" target="_blank">🗺️ Open Google Maps Profile</a>
+                            </div>
+                            <div style="font-size: 11.5px; color: var(--text-subtle);">
+                                Saved from search: <strong>${escapeHtml(lead.searchQuery || 'General')}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
                 container.appendChild(card);
             });
         }
 
-        async function updateLead(id, status) {
+        function toggleCard(cardId, event) {
+            // Prevent expand on select/action clicks
+            if (['SELECT', 'BUTTON', 'A', 'INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
+            const card = document.getElementById(`card-${cardId}`);
+            if (card) card.classList.toggle('open');
+        }
+
+        async function updateLeadStatus(id, status, event) {
+            event.stopPropagation();
+            const lead = globalLeads.find(l => String(l.id) === String(id));
+            if (lead) lead.status = status;
+
+            // Update select styling
+            const selectEl = event.target;
+            selectEl.className = `status-select status-${status}`;
+
             await fetch('/api/leads/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, status })
             });
-            const lead = globalLeads.find(l => l.id == id);
-            if (lead) lead.status = status;
-            updateMetrics(globalLeads);
+
+            updateMetrics(activeTab === 'ALL' ? globalLeads : globalLeads.filter(l => l.searchQuery === activeTab));
+            showToast('Lead status updated', '💼');
         }
 
+        async function updateLeadNotes(id, notes) {
+            const lead = globalLeads.find(l => String(l.id) === String(id));
+            if (lead) lead.notes = notes;
+
+            await fetch('/api/leads/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, notes })
+            });
+            showToast('Notes saved', '💾');
+        }
+
+        async function deleteLead(id) {
+            if (!confirm('Are you sure you want to delete this lead?')) return;
+            
+            globalLeads = globalLeads.filter(l => String(l.id) !== String(id));
+            renderTabs();
+            applyFilters();
+
+            await fetch('/api/leads/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            showToast('Lead removed', '🗑️');
+        }
+
+        async function clearCurrentTabLeads() {
+            const targetName = activeTab === 'ALL' ? 'ALL saved leads' : `leads in "${activeTab}"`;
+            if (!confirm(`Are you sure you want to clear ${targetName}?`)) return;
+
+            if (activeTab === 'ALL') {
+                globalLeads = [];
+            } else {
+                globalLeads = globalLeads.filter(l => l.searchQuery !== activeTab);
+                activeTab = 'ALL';
+            }
+
+            renderTabs();
+            applyFilters();
+
+            await fetch('/api/leads/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: activeTab })
+            });
+            showToast('Cleared leads successfully', '✨');
+        }
+
+        function copyPitch(id) {
+            const el = document.getElementById(`pitch-text-${id}`);
+            if (el) {
+                navigator.clipboard.writeText(el.innerText);
+                showToast('Cold pitch copied to clipboard!', '📋');
+            }
+        }
+
+        function exportCSV() {
+            const queryParam = activeTab !== 'ALL' ? `?query=${encodeURIComponent(activeTab)}` : '';
+            window.location.href = `/api/leads/export${queryParam}`;
+            showToast('Downloading Full CSV...', '📥');
+        }
+
+        function exportOutreachCSV() {
+            const queryParam = activeTab !== 'ALL' ? `?query=${encodeURIComponent(activeTab)}` : '';
+            window.location.href = `/api/leads/export-outreach${queryParam}`;
+            showToast('Downloading Outreach CSV (Owner, Company, Phone, Email)...', '✉️');
+        }
+
+        function generateCodexzMail(lead) {
+            const ownerName = lead.ownerName && lead.ownerName !== 'Not Listed' ? lead.ownerName : 'Business Owner';
+            const companyName = lead.shopName || 'your business';
+            const ratingText = lead.rating !== 'N/A' ? ` (⭐ ${lead.rating} rating on Google)` : '';
+            const recipientEmail = lead.email && lead.email !== 'None' ? lead.email : '';
+
+            let subject = '';
+            let specificHook = '';
+
+            if (lead.siteStatus === 'Missing') {
+                subject = `Website & Digital Growth System for ${companyName} — Codexz Solution`;
+                specificHook = `I noticed that ${companyName} has built a solid local presence${ratingText}, but currently does not have an official website connected. Having a modern, mobile-first website and automated inquiry system can easily increase your direct customer bookings and inquiries by 30–50%.`;
+            } else if (lead.siteStatus.includes('Insecure') || lead.siteStatus.includes('Outdated')) {
+                subject = `Modern Digital Redesign & Automation Proposal for ${companyName} — Codexz Solution`;
+                specificHook = `I was browsing through ${lead.website} and noticed an opportunity to modernize the design, speed, and mobile user experience to match your strong business reputation${ratingText}. A modern digital upgrade will significantly boost your customer conversion rate.`;
+            } else {
+                subject = `Custom CRM & Business Workflow Automation for ${companyName} — Codexz Solution`;
+                specificHook = `I came across your online presence at ${companyName} and loved what you've built. We work with forward-thinking businesses to automate customer inquiries, lead capture, and CRM workflows so your team saves hours every week.`;
+            }
+
+            const body = `Hi ${ownerName},
+
+I hope this email finds you well.
+
+I came across ${companyName} on Google Maps and was impressed with your business${ratingText}.
+
+I'm reaching out from Codexz Solution (https://codexz-solutions.vercel.app/) — we are a digital technology agency that builds custom digital systems to help businesses grow and streamline operations.
+
+${specificHook}
+
+At Codexz, we specialize in:
+• Web & Mobile Development: High-performance websites, web apps, e-commerce, and iOS/Android applications.
+• Business Automation: Automating lead capture, repetitive workflows, customer onboarding, and follow-up sequences.
+• Custom CRM & Dashboards: Centralized pipelines to track leads, customers, and operations.
+• AI-Powered Solutions & WhatsApp Bots: 24/7 instant automated customer response and booking workflows.
+
+You can view our services, solutions, and selected client work here:
+👉 https://codexz-solutions.vercel.app/#work
+
+Would you be open to a quick 10-minute discovery chat this week to explore how we can help ${companyName} get more customers and streamline your processes?
+
+Looking forward to connecting!
+
+Best regards,
+
+Sales & Partnerships Team
+Codexz Solution
+🌐 Website: https://codexz-solutions.vercel.app/
+✉️ Email: codexzsolutions@gmail.com`;
+
+            return {
+                to: recipientEmail,
+                subject: subject,
+                body: body
+            };
+        }
+
+        function openDraftModal(id) {
+            const lead = globalLeads.find(l => String(l.id) === String(id));
+            if (!lead) return;
+
+            const mailData = generateCodexzMail(lead);
+            document.getElementById('modal-mail-to').value = mailData.to;
+            document.getElementById('modal-mail-subject').value = mailData.subject;
+            document.getElementById('modal-mail-body').value = mailData.body;
+
+            const modal = document.getElementById('draft-mail-modal');
+            modal.classList.add('active');
+        }
+
+        function closeDraftModal() {
+            const modal = document.getElementById('draft-mail-modal');
+            modal.classList.remove('active');
+        }
+
+        function handleModalBackdropClick(e) {
+            if (e.target.id === 'draft-mail-modal') {
+                closeDraftModal();
+            }
+        }
+
+        function copyModalSubject() {
+            const subj = document.getElementById('modal-mail-subject').value;
+            navigator.clipboard.writeText(subj);
+            showToast('Subject line copied to clipboard!', '📋');
+        }
+
+        function copyModalBody() {
+            const body = document.getElementById('modal-mail-body').value;
+            navigator.clipboard.writeText(body);
+            showToast('Codexz proposal body copied to clipboard!', '📋');
+        }
+
+        function openGmailCompose() {
+            const to = document.getElementById('modal-mail-to').value.trim();
+            const subject = document.getElementById('modal-mail-subject').value.trim();
+            const body = document.getElementById('modal-mail-body').value.trim();
+
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(gmailUrl, '_blank');
+            showToast('Opening Gmail Compose...', '🔴');
+        }
+
+        function openDefaultMail() {
+            const to = document.getElementById('modal-mail-to').value.trim();
+            const subject = document.getElementById('modal-mail-subject').value.trim();
+            const body = document.getElementById('modal-mail-body').value.trim();
+
+            const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoUrl;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Initialize on load
         loadLeads();
     </script>
 </body>
