@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Lead Finder & Pipeline CRM</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,13 +41,15 @@
             margin: 0;
             padding: 0;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-page);
             color: var(--text-main);
-            padding: 28px 32px;
+            padding: 24px 28px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
@@ -82,6 +84,7 @@
             color: white;
             font-size: 20px;
             box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
         }
 
         header h1 {
@@ -89,6 +92,7 @@
             font-weight: 800;
             color: var(--text-main);
             letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         header p {
@@ -101,25 +105,26 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         /* Metric Cards */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
             margin-bottom: 24px;
         }
 
         .metric-card {
             background: var(--card-bg);
-            padding: 18px 20px;
+            padding: 16px 18px;
             border-radius: var(--radius-lg);
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             transition: transform 0.15s ease;
         }
 
@@ -128,8 +133,8 @@
         }
 
         .metric-icon-box {
-            width: 46px;
-            height: 46px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -147,7 +152,7 @@
         }
 
         .metric-info h2 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             margin-top: 2px;
             letter-spacing: -0.02em;
@@ -170,18 +175,6 @@
             align-items: center;
         }
 
-        @media (max-width: 1024px) {
-            .search-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .search-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         .input-group {
             position: relative;
         }
@@ -197,6 +190,7 @@
             background: #FAFAFA;
             color: var(--text-main);
             transition: all 0.2s;
+            min-height: 42px;
         }
 
         input[type="text"]:focus,
@@ -215,12 +209,13 @@
             cursor: pointer;
             color: var(--text-main);
             user-select: none;
+            min-height: 42px;
         }
 
         .checkbox-label input {
             accent-color: var(--primary);
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
         }
 
@@ -237,6 +232,12 @@
             cursor: pointer;
             transition: all 0.15s ease;
             text-decoration: none;
+            min-height: 40px;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -275,10 +276,23 @@
             background: #FEE2E2;
         }
 
+        .btn-call {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+            font-weight: 700;
+        }
+
+        .btn-call:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
             border-radius: 8px;
+            min-height: 34px;
         }
 
         /* Scraper Progress Area */
@@ -325,6 +339,7 @@
             justify-content: space-between;
             overflow-x: auto;
             gap: 8px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tabs-container {
@@ -333,6 +348,7 @@
             overflow-x: auto;
             scrollbar-width: none;
             padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tabs-container::-webkit-scrollbar {
@@ -356,6 +372,7 @@
             transition: all 0.15s ease;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
+            min-height: 40px;
         }
 
         .tab-btn:hover {
@@ -381,19 +398,6 @@
         .tab-btn.active .tab-badge {
             background: var(--primary);
             color: white;
-        }
-
-        .tab-close {
-            font-size: 14px;
-            line-height: 1;
-            color: var(--text-subtle);
-            border-radius: 50%;
-            padding: 2px;
-        }
-
-        .tab-close:hover {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
         }
 
         /* Filter Toolbar */
@@ -443,23 +447,18 @@
 
         .lead-header {
             display: grid;
-            grid-template-columns: 2.5fr 1.6fr 1.6fr 1.6fr 140px auto;
+            grid-template-columns: 2.3fr 1.8fr 1.4fr 1.5fr 130px auto;
             gap: 14px;
             padding: 16px 20px;
             align-items: center;
             cursor: pointer;
             user-select: none;
             background: white;
+            transition: background-color 0.15s;
         }
 
-        @media (max-width: 1024px) {
-            .lead-header {
-                grid-template-columns: 2fr 1fr 1fr auto;
-            }
-            .lead-header .col-opportunity,
-            .lead-header .col-phone {
-                display: none;
-            }
+        .lead-header:hover {
+            background-color: #FAFCFF;
         }
 
         .shop-title-box {
@@ -475,6 +474,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            line-height: 1.3;
         }
 
         .shop-cat {
@@ -499,20 +499,48 @@
         }
 
         .contact-col {
-            font-size: 13px;
-            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
-        .contact-pill {
+        /* Quick Dial Button */
+        .quick-dial-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 12.5px;
-            font-weight: 500;
-            color: var(--text-main);
+            font-weight: 700;
+            color: #065F46;
+            background: #D1FAE5;
+            border: 1px solid #A7F3D0;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(16, 185, 129, 0.1);
+        }
+
+        .quick-dial-btn:hover {
+            background: #10B981;
+            color: white;
+            border-color: #059669;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        }
+
+        .quick-dial-btn:active {
+            transform: scale(0.96);
+        }
+
+        .quick-dial-btn.disabled {
+            opacity: 0.55;
+            pointer-events: none;
+            background: #F1F5F9;
+            color: #94A3B8;
+            border-color: #E2E8F0;
+            box-shadow: none;
         }
 
         .email-pill {
@@ -520,12 +548,16 @@
             color: var(--primary-dark);
             font-weight: 600;
             background: var(--primary-light);
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: 6px;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             width: fit-content;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Badges */
@@ -580,6 +612,7 @@
             background: #F8FAFC;
             cursor: pointer;
             outline: none;
+            min-height: 34px;
         }
 
         .status-select.status-New { color: #2563EB; background: #EFF6FF; border-color: #BFDBFE; }
@@ -634,6 +667,42 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--text-main);
+        }
+
+        .drawer-tel-link {
+            color: #059669;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 0;
+        }
+
+        .drawer-tel-link:hover {
+            text-decoration: underline;
+        }
+
+        .drawer-tel-link .dial-hint {
+            font-size: 11px;
+            font-weight: 600;
+            color: #10B981;
+            background: #ECFDF5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .drawer-addr-link {
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .drawer-addr-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
         }
 
         /* Outreach Action Toolbar */
@@ -748,6 +817,7 @@
             display: flex;
             gap: 14px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn-link {
@@ -793,6 +863,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            max-width: 90vw;
         }
 
         .toast {
@@ -843,6 +914,7 @@
             z-index: 10000;
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
 
         .modal-overlay.active {
@@ -853,7 +925,7 @@
             background: white;
             border-radius: 16px;
             width: 720px;
-            max-width: 92vw;
+            max-width: 100%;
             max-height: 88vh;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -863,7 +935,7 @@
         }
 
         @keyframes modalSlideIn {
-            from { transform: translateY(30px) scale(0.97); opacity: 0; }
+            from { transform: translateY(20px) scale(0.98); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
@@ -871,7 +943,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 24px;
+            padding: 18px 22px;
             border-bottom: 1px solid var(--border-color);
             background: #F8FAFC;
         }
@@ -913,13 +985,13 @@
         }
 
         .modal-body {
-            padding: 24px;
+            padding: 20px 22px;
             overflow-y: auto;
             flex: 1;
         }
 
         .mail-field {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .mail-field label {
@@ -951,12 +1023,12 @@
 
         .mail-body-area {
             width: 100%;
-            min-height: 300px;
-            padding: 16px;
+            min-height: 260px;
+            padding: 14px;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            font-size: 13.5px;
-            line-height: 1.7;
+            font-size: 13px;
+            line-height: 1.6;
             outline: none;
             resize: vertical;
             background: #FAFAFA;
@@ -974,7 +1046,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
+            padding: 14px 22px;
             border-top: 1px solid var(--border-color);
             background: #F8FAFC;
             gap: 10px;
@@ -1006,6 +1078,271 @@
         .btn-draft:hover {
             background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
         }
+
+        /* ----------------------------------------------------
+           RESPONSIVE MOBILE STYLES & DIALER OPTIMIZATIONS
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            .lead-header {
+                grid-template-columns: 2fr 1.6fr 1.2fr 130px auto;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+            .col-opportunity {
+                display: none;
+            }
+            .search-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px 14px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px;
+                margin-bottom: 18px;
+            }
+
+            .brand-title {
+                width: 100%;
+            }
+
+            header h1 {
+                font-size: 19px;
+            }
+
+            header p {
+                font-size: 12px;
+            }
+
+            .header-actions {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                font-size: 12px;
+                padding: 8px 6px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+
+            .metric-card {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+
+            .metric-icon-box {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+                border-radius: 10px;
+            }
+
+            .metric-info span {
+                font-size: 10px;
+            }
+
+            .metric-info h2 {
+                font-size: 20px;
+            }
+
+            .card {
+                padding: 16px 14px;
+                margin-bottom: 18px;
+            }
+
+            .search-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .filter-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .search-input-box {
+                min-width: 100%;
+                width: 100%;
+            }
+
+            .filter-group select {
+                width: 100% !important;
+            }
+
+            /* Responsive Mobile Lead Card Header */
+            .lead-header {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px 16px;
+                gap: 10px;
+            }
+
+            .lead-header-top-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .lead-header-actions-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding-top: 8px;
+                border-top: 1px solid #F1F5F9;
+            }
+
+            .lead-header-actions-left {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .lead-header-actions-right {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .quick-dial-btn {
+                padding: 7px 12px;
+                font-size: 12.5px;
+            }
+
+            .lead-drawer {
+                padding: 14px 16px;
+            }
+
+            .outreach-bar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .outreach-bar .btn {
+                width: 100%;
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .outreach-bar .btn-danger {
+                margin-left: 0 !important;
+                grid-column: span 2;
+            }
+
+            .drawer-top-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 12px;
+            }
+
+            .drawer-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .modal-box {
+                width: 96vw;
+                max-height: 92vh;
+                border-radius: 12px;
+            }
+
+            .modal-header {
+                padding: 14px 16px;
+            }
+
+            .modal-body {
+                padding: 14px 16px;
+            }
+
+            .mail-body-area {
+                min-height: 180px;
+                font-size: 13px;
+            }
+
+            .modal-footer {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-action-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                width: 100%;
+            }
+
+            #toast-container {
+                right: 12px;
+                left: 12px;
+                bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px 10px;
+            }
+
+            .header-actions {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .metric-card {
+                padding: 10px 12px;
+            }
+
+            .outreach-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .outreach-bar .btn-danger {
+                grid-column: span 1;
+            }
+
+            .modal-action-buttons {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 
@@ -1027,10 +1364,10 @@
                     🧹 Clean Duplicates
                 </button>
                 <button class="btn btn-primary btn-sm" onclick="exportOutreachCSV()" title="Exports clean CSV with Owner Name, Company Name, Phone Number, and Email">
-                    ✉️ Export Outreach CSV (Owner, Company, Phone, Email)
+                    ✉️ Outreach CSV
                 </button>
                 <button class="btn btn-secondary btn-sm" onclick="exportCSV()" title="Exports all lead columns">
-                    📥 Export Full CSV
+                    📥 Full CSV
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="clearCurrentTabLeads()">
                     🗑️ Clear Tab
@@ -1111,7 +1448,7 @@
             <div id="progress-box" class="progress-box" style="display: none;">
                 <div class="progress-header">
                     <span id="progress-msg"><span class="spinner"></span> Initializing Google Maps engine...</span>
-                    <span id="progress-count" class="tab-badge" style="background: #DBEAFE; color: #1E40AF;">0 leads collected</span>
+                    <span id="progress-count" class="tab-badge" style="background: #DBEAFE; color: #1E40AF;">0 collected</span>
                 </div>
             </div>
         </div>
@@ -1195,7 +1532,7 @@
                 <div class="footer-hint">
                     🚀 Agency: <strong>Codexz Solution</strong> (codexz-solutions.vercel.app)
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <div class="modal-action-buttons">
                     <button class="btn btn-secondary btn-sm" onclick="copyModalSubject()">📋 Copy Subject</button>
                     <button class="btn btn-secondary btn-sm" onclick="copyModalBody()">📋 Copy Email Body</button>
                     <button class="btn btn-gmail btn-sm" onclick="openGmailCompose()">
@@ -1212,9 +1549,9 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
-        const socket = io();
+        const socket = typeof io !== 'undefined' ? io({ autoConnect: true, reconnectionAttempts: 3 }) : { on: () => {}, emit: () => {} };
         let globalLeads = [];
         let activeTab = 'ALL';
         let isScraping = false;
@@ -1231,12 +1568,39 @@
                 toast.style.transform = 'translateX(100%)';
                 toast.style.transition = 'all 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3200);
         }
 
         function toggleLocationInput(checkbox) {
             document.getElementById('location').disabled = checkbox.checked;
             if (checkbox.checked) document.getElementById('location').value = '';
+        }
+
+        // Phone Sanitizer for Mobile Dialer Integration
+        function sanitizePhoneForDial(phone) {
+            if (!phone || typeof phone !== 'string') return '';
+            const clean = phone.trim();
+            if (clean === '' || clean === 'N/A' || clean === 'None') return '';
+            if (clean.startsWith('+')) {
+                const digits = clean.replace(/\D/g, '');
+                return digits.length >= 5 ? `+${digits}` : '';
+            }
+            const digits = clean.replace(/\D/g, '');
+            return digits.length >= 5 ? digits : '';
+        }
+
+        // Handle Quick Dial Action for Cold Callers
+        function handleDialCall(phone, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const clean = sanitizePhoneForDial(phone);
+            if (!clean) {
+                showToast('No valid phone number to dial', '⚠️');
+                return;
+            }
+            showToast(`Opening dialer for ${phone}...`, '📞');
+            window.location.href = `tel:${clean}`;
         }
 
         // Canonical Lead Fingerprinting on Client
@@ -1356,7 +1720,6 @@
             document.getElementById('progress-msg').innerHTML = `<span class="spinner"></span> Scraping "${data.query}"...`;
             document.getElementById('progress-count').innerText = `0 collected`;
 
-            // Switch to or create new tab
             ensureTabExists(data.query);
             switchTab(data.query);
         });
@@ -1371,7 +1734,6 @@
             currentScrapeCount++;
             document.getElementById('progress-count').innerText = `${currentScrapeCount} collected`;
             
-            // Add or merge lead if already present
             const existingIdx = globalLeads.findIndex(l => isSameLeadClient(l, singleLead));
             if (existingIdx === -1) {
                 globalLeads.unshift(singleLead);
@@ -1551,7 +1913,6 @@
                 } else if (sortBy === 'name') {
                     return (a.shopName || '').localeCompare(b.shopName || '');
                 } else {
-                    // Newest first by id or createdAt
                     return (b.id || 0) - (a.id || 0);
                 }
             });
@@ -1604,6 +1965,7 @@
 
                 const pitchScript = generatePitch(lead);
                 const rawPhone = lead.phone ? lead.phone.replace(/[^0-9]/g, '') : '';
+                const cleanPhone = sanitizePhoneForDial(lead.phone);
                 const waLink = rawPhone ? `https://wa.me/${rawPhone}?text=${encodeURIComponent(pitchScript)}` : '#';
                 const mailLink = lead.email && lead.email !== 'None' ? `mailto:${lead.email}?subject=${encodeURIComponent(`Website & Growth Proposal for ${lead.shopName}`)}&body=${encodeURIComponent(pitchScript)}` : '#';
 
@@ -1611,20 +1973,29 @@
                 card.className = 'lead-card';
                 card.id = `card-${lead.id}`;
 
+                // Quick dial button HTML for cold callers
+                const quickDialHtml = cleanPhone
+                    ? `<a href="tel:${cleanPhone}" class="quick-dial-btn" onclick="handleDialCall('${escapeHtml(lead.phone)}', event)" title="Tap to open phone dialer with number">📞 ${escapeHtml(lead.phone)}</a>`
+                    : `<span class="quick-dial-btn disabled">📞 No Phone</span>`;
+
                 card.innerHTML = `
+                    <!-- Lead Card Header (Desktop & Mobile Adaptive) -->
                     <div class="lead-header" onclick="toggleCard('${lead.id}', event)">
-                        <div class="shop-title-box">
-                            <div class="shop-title">
-                                ${escapeHtml(lead.shopName)}
+                        <div class="lead-header-top-row">
+                            <div class="shop-title-box">
+                                <div class="shop-title">
+                                    ${escapeHtml(lead.shopName)}
+                                </div>
+                                <div class="shop-cat">
+                                    <span>${escapeHtml(lead.category)}</span>
+                                    ${lead.rating !== 'N/A' ? `<span class="rating-pill">⭐ ${lead.rating} (${lead.reviews})</span>` : ''}
+                                </div>
                             </div>
-                            <div class="shop-cat">
-                                <span>${escapeHtml(lead.category)}</span>
-                                ${lead.rating !== 'N/A' ? `<span class="rating-pill">⭐ ${lead.rating} (${lead.reviews})</span>` : ''}
-                            </div>
+                            <div class="chevron">▼</div>
                         </div>
 
                         <div class="contact-col col-phone">
-                            <div class="contact-pill">📞 ${escapeHtml(lead.phone)}</div>
+                            ${quickDialHtml}
                             ${lead.email && lead.email !== 'None' ? `<div class="email-pill">✉️ ${escapeHtml(lead.email)}</div>` : ''}
                         </div>
 
@@ -1644,17 +2015,15 @@
                                 <option value="Rejected" ${lead.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
                             </select>
                         </div>
-
-                        <div class="chevron">▼</div>
                     </div>
 
                     <div class="lead-drawer">
                         <!-- Outreach Bar -->
                         <div class="outreach-bar">
-                            <button class="btn btn-draft btn-sm" onclick="openDraftModal('${lead.id}')">✉️ Draft Mail (Codexz)</button>
+                            ${cleanPhone ? `<a href="tel:${cleanPhone}" onclick="handleDialCall('${escapeHtml(lead.phone)}', event)" class="btn btn-call btn-sm">📞 Call Direct (Dialer)</a>` : ''}
                             ${rawPhone ? `<a href="${waLink}" target="_blank" class="btn btn-whatsapp btn-sm">💬 WhatsApp Pitch</a>` : ''}
+                            <button class="btn btn-draft btn-sm" onclick="openDraftModal('${lead.id}')">✉️ Draft Mail (Codexz)</button>
                             ${lead.email && lead.email !== 'None' ? `<a href="${mailLink}" target="_blank" class="btn btn-email btn-sm">✉️ Direct Mail</a>` : ''}
-                            ${lead.phone && lead.phone !== 'N/A' ? `<a href="tel:${lead.phone}" class="btn btn-secondary btn-sm">📞 Call Direct</a>` : ''}
                             <button class="btn btn-secondary btn-sm" onclick="copyPitch('${lead.id}')">📋 Copy Pitch</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteLead('${lead.id}')" style="margin-left: auto;">🗑️ Delete</button>
                         </div>
@@ -1666,8 +2035,16 @@
                                 <span>${escapeHtml(lead.ownerName || 'Not Listed')}</span>
                             </div>
                             <div class="drawer-item">
+                                <label>📞 Phone Number</label>
+                                ${cleanPhone 
+                                    ? `<a href="tel:${cleanPhone}" class="drawer-tel-link" onclick="handleDialCall('${escapeHtml(lead.phone)}', event)">📞 ${escapeHtml(lead.phone)} <span class="dial-hint">Tap to Dial</span></a>` 
+                                    : `<span>${escapeHtml(lead.phone || 'N/A')}</span>`}
+                            </div>
+                            <div class="drawer-item">
                                 <label>📍 Address</label>
-                                <span>${escapeHtml(lead.address || 'N/A')}</span>
+                                ${lead.address && lead.address !== 'N/A' 
+                                    ? `<a href="${lead.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(lead.address)}`}" target="_blank" class="drawer-addr-link">📍 ${escapeHtml(lead.address)}</a>` 
+                                    : `<span>${escapeHtml(lead.address || 'N/A')}</span>`}
                             </div>
                             <div class="drawer-item">
                                 <label>🕒 Operating Hours</label>
@@ -1708,7 +2085,7 @@
                         <div class="drawer-footer">
                             <div class="links-group">
                                 ${lead.website && lead.website !== 'None' ? `<a href="${lead.website}" class="btn-link" target="_blank">🌐 Open Website</a>` : '<span style="color:#94A3B8; font-size:12px;">No Website Attached</span>'}
-                                <a href="${lead.mapsUrl}" class="btn-link" target="_blank">🗺️ Open Google Maps Profile</a>
+                                ${lead.mapsUrl ? `<a href="${lead.mapsUrl}" class="btn-link" target="_blank">🗺️ Open Google Maps Profile</a>` : ''}
                             </div>
                             <div style="font-size: 11.5px; color: var(--text-subtle);">
                                 Saved from search: <strong>${escapeHtml(lead.searchQuery || 'General')}</strong>
@@ -1722,8 +2099,8 @@
         }
 
         function toggleCard(cardId, event) {
-            // Prevent expand on select/action clicks
-            if (['SELECT', 'BUTTON', 'A', 'INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
+            // Prevent expand on interactive elements
+            if (['SELECT', 'BUTTON', 'A', 'INPUT', 'TEXTAREA'].includes(event.target.tagName) || event.target.closest('.quick-dial-btn') || event.target.closest('.status-select')) return;
             const card = document.getElementById(`card-${cardId}`);
             if (card) card.classList.toggle('open');
         }
@@ -1733,7 +2110,6 @@
             const lead = globalLeads.find(l => String(l.id) === String(id));
             if (lead) lead.status = status;
 
-            // Update select styling
             const selectEl = event.target;
             selectEl.className = `status-select status-${status}`;
 
@@ -1813,7 +2189,7 @@
         function exportOutreachCSV() {
             const queryParam = activeTab !== 'ALL' ? `?query=${encodeURIComponent(activeTab)}` : '';
             window.location.href = `/api/leads/export-outreach${queryParam}`;
-            showToast('Downloading Outreach CSV (Owner, Company, Phone, Email)...', '✉️');
+            showToast('Downloading Outreach CSV...', '✉️');
         }
 
         function generateCodexzMail(lead) {

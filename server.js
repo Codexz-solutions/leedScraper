@@ -12,7 +12,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const CSV_FILE = path.join(__dirname, 'leads.csv');
+const CSV_FILE = process.env.VERCEL ? path.join('/tmp', 'leads.csv') : path.join(__dirname, 'leads.csv');
+
+function initVercelStorage() {
+    if (process.env.VERCEL) {
+        const bundledCSV = path.join(__dirname, 'leads.csv');
+        if (!fs.existsSync(CSV_FILE) && fs.existsSync(bundledCSV)) {
+            try {
+                fs.copyFileSync(bundledCSV, CSV_FILE);
+            } catch (err) {
+                console.error('Error copying initial leads to /tmp:', err);
+            }
+        }
+    }
+}
+initVercelStorage();
 
 const CSV_FIELDS = [
     'id',
@@ -40,12 +54,25 @@ const CSV_FIELDS = [
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// Explicit Root Route for Vercel Serverless
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Helper: Read and Normalize CSV
 function readLeads() {
     return new Promise((resolve) => {
-        if (!fs.existsSync(CSV_FILE)) return resolve([]);
+        let targetFile = CSV_FILE;
+        if (!fs.existsSync(targetFile)) {
+            const bundledCSV = path.join(__dirname, 'leads.csv');
+            if (fs.existsSync(bundledCSV)) {
+                targetFile = bundledCSV;
+            } else {
+                return resolve([]);
+            }
+        }
         const leads = [];
-        fs.createReadStream(CSV_FILE)
+        fs.createReadStream(targetFile)
             .pipe(csvParser())
             .on('data', (raw) => {
                 // Normalize and handle legacy field names
@@ -261,19 +288,23 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, async () => {
-    console.log(`🚀 Lead Finder Dashboard live at: http://localhost:${PORT}`);
-    // Auto-clean any existing historical duplicates on startup
-    try {
-        const raw = await readLeads();
-        if (raw.length > 0) {
-            const deduped = deduplicateLeads(raw);
-            if (deduped.length !== raw.length) {
-                console.log(`🧹 Cleaned ${raw.length - deduped.length} duplicate leads from storage on startup.`);
-                saveLeads(deduped);
+if (require.main === module || !process.env.VERCEL) {
+    server.listen(PORT, async () => {
+        console.log(`🚀 Lead Finder Dashboard live at: http://localhost:${PORT}`);
+        // Auto-clean any existing historical duplicates on startup
+        try {
+            const raw = await readLeads();
+            if (raw.length > 0) {
+                const deduped = deduplicateLeads(raw);
+                if (deduped.length !== raw.length) {
+                    console.log(`🧹 Cleaned ${raw.length - deduped.length} duplicate leads from storage on startup.`);
+                    saveLeads(deduped);
+                }
             }
+        } catch (e) {
+            console.error('Startup deduplication error:', e.message);
         }
-    } catch (e) {
-        console.error('Startup deduplication error:', e.message);
-    }
-});
+    });
+}
+
+module.exports = app;
