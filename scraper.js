@@ -2,6 +2,7 @@ const { chromium } = require('playwright');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const { getLeadFingerprints, isSameLead, normalizeText } = require('./dedupe');
 
 /**
  * Launch Playwright Chromium with graceful fallback
@@ -405,45 +406,98 @@ async function scrapeGoogleMaps(options, updateProgress, onLeadScraped) {
         }
     }
 
-    updateProgress(`Scanning Google Maps feed...`);
-
-    // Auto-scroll feed dynamically based on requested results
-    const scrollIterations = Math.min(Math.ceil(maxResults / 3), 8);
-    for (let i = 0; i < scrollIterations; i++) {
-        await page.evaluate(() => {
-            const feed = document.querySelector('div[role="feed"]');
-            if (feed) feed.scrollBy(0, 1500);
-        });
-        await page.waitForTimeout(1000);
-    }
-
-    const listingHandles = await page.$$('div[role="feed"] > div > div[role="article"]');
-    const totalFound = Math.min(listingHandles.length, maxResults);
-
-    if (totalFound === 0) {
-        updateProgress(`No listings found for query "${searchQuery}".`);
-        await browser.close();
-        return [];
-    }
-
-    updateProgress(`Found listings. Extracting profiles & website leadership for ${totalFound} businesses...`);
+    updateProgress(`Scanning Google Maps feed for unique listings...`);
 
     const processedLeads = [];
+    const seenFingerprints = new Set();
+    let cardIdx = 0;
+    let consecutiveScrollsWithoutNew = 0;
+    const maxConsecutiveScrolls = 6;
 
-    for (let i = 0; i < totalFound; i++) {
-        try {
-            const handles = await page.$$('div[role="feed"] > div > div[role="article"]');
-            if (!handles[i]) continue;
+    while (processedLeads.length < maxResults && consecutiveScrollsWithoutNew < maxConsecutiveScrolls) {
+        // Query visible article cards in the results feed
+        const handles = await page.$$('div[role="feed"] > div > div[role="article"]');
 
-            const cardFallback = await handles[i].evaluate(el => {
-                const label = el.getAttribute('aria-label');
-                if (label) return label.trim();
-                const heading = el.querySelector('div.fontHeadlineSmall, div.qBF1Pd, h2, h3');
-                return heading ? heading.innerText.trim() : '';
+        if (cardIdx >= handles.length) {
+            // Need more cards: scroll feed down
+            updateProgress(`Scrolling for more listings (${processedLeads.length}/${maxResults} collected)...`);
+            const prevHandleCount = handles.length;
+
+            await page.evaluate(() => {
+                const feed = document.querySelector('div[role="feed"]');
+                if (feed) feed.scrollBy(0, 1800);
+            });
+            await page.waitForTimeout(1400);
+
+            const newHandles = await page.$$('div[role="feed"] > div > div[role="article"]');
+            
+            // Check if end of list reached
+            const isEndOfList = await page.evaluate(() => {
+                const endText = document.body.innerText;
+                return endText.includes("You've reached the end of the list") || 
+                       endText.includes("No more results") ||
+                       Boolean(document.querySelector('div.HlvSq, span.HlvSq'));
             });
 
-            await handles[i].click();
-            await page.waitForTimeout(1800);
+            if (newHandles.length <= prevHandleCount || isEndOfList) {
+                consecutiveScrollsWithoutNew++;
+                if (isEndOfList && cardIdx >= newHandles.length) {
+                    break;
+                }
+            } else {
+                consecutiveScrollsWithoutNew = 0;
+            }
+
+            if (cardIdx >= newHandles.length) {
+                // If still beyond bounds after scroll attempt, check retry limit
+                continue;
+            }
+        }
+
+        try {
+            const currentHandles = await page.$$('div[role="feed"] > div > div[role="article"]');
+            const handle = currentHandles[cardIdx];
+            if (!handle) {
+                cardIdx++;
+                continue;
+            }
+
+            // Inspect card title / label pre-click
+            const cardInfo = await handle.evaluate(el => {
+                const label = el.getAttribute('aria-label') || '';
+                const heading = el.querySelector('div.fontHeadlineSmall, div.qBF1Pd, h2, h3');
+                const headingText = heading ? heading.innerText.trim() : '';
+                const link = el.querySelector('a[href*="/maps/place/"]');
+                const href = link ? link.getAttribute('href') : '';
+                return {
+                    name: label.trim() || headingText,
+                    href: href || ''
+                };
+            });
+
+            // Fast-check pre-click candidate against seen fingerprints
+            if (cardInfo.name && cardInfo.name !== 'Results' && cardInfo.name !== 'Local Business') {
+                const preCandidate = {
+                    shopName: cardInfo.name,
+                    mapsUrl: cardInfo.href || '',
+                    searchQuery
+                };
+                if (isSameLead(preCandidate, { shopName: cardInfo.name, searchQuery }) && seenFingerprints.has(`name_norm:${normalizeText(cardInfo.name)}`)) {
+                    // Already processed this exact shop name
+                    cardIdx++;
+                    continue;
+                }
+            }
+
+            // Scroll card into view and click
+            await handle.scrollIntoViewIfNeeded();
+            await handle.click();
+            await page.waitForTimeout(1400);
+
+            // Wait for place detail panel to settle
+            try {
+                await page.waitForSelector('h1.DUwif, div.TIHn2 h1, h1.fontHeadlineLarge, div.lMbq3e h1', { timeout: 3000 });
+            } catch (e) {}
 
             const leadData = await page.evaluate((fallbackName) => {
                 let shopName = '';
@@ -500,10 +554,37 @@ async function scrapeGoogleMaps(options, updateProgress, onLeadScraped) {
                 const mapsUrl = window.location.href;
 
                 return { shopName, category, rating, reviews, ownerName, phone, website, rawAddress, openingHours, mapsUrl };
-            }, cardFallback);
+            }, cardInfo.name);
 
             const address = sanitizeText(leadData.rawAddress);
-            updateProgress(`Auditing website & leadership (${i + 1}/${totalFound}): ${leadData.shopName}...`);
+
+            const candidate = {
+                shopName: leadData.shopName,
+                phone: leadData.phone,
+                website: leadData.website,
+                address: address,
+                mapsUrl: leadData.mapsUrl,
+                searchQuery
+            };
+
+            // Check if extracted lead matches any seen fingerprints or existing processed lead
+            const fingerprints = getLeadFingerprints(candidate);
+            const isDuplicate = fingerprints.some(fp => seenFingerprints.has(fp)) ||
+                processedLeads.some(pl => isSameLead(pl, candidate));
+
+            if (isDuplicate) {
+                // Register any identifiers to skip future occurrences
+                fingerprints.forEach(fp => seenFingerprints.add(fp));
+                if (candidate.shopName) seenFingerprints.add(`name_norm:${normalizeText(candidate.shopName)}`);
+                cardIdx++;
+                continue;
+            }
+
+            // Register fingerprints for this unique lead
+            fingerprints.forEach(fp => seenFingerprints.add(fp));
+            if (candidate.shopName) seenFingerprints.add(`name_norm:${normalizeText(candidate.shopName)}`);
+
+            updateProgress(`Auditing website & leadership (${processedLeads.length + 1}/${maxResults}): ${leadData.shopName}...`);
 
             // Run deep website audit (emails, owner, socials, tech stack, opportunity)
             const audit = await auditWebsite(leadData.website, leadData.shopName);
@@ -513,7 +594,7 @@ async function scrapeGoogleMaps(options, updateProgress, onLeadScraped) {
                 : (audit.ownerName || 'Not Listed');
 
             const completeLead = {
-                id: Date.now() + i,
+                id: Date.now() + processedLeads.length,
                 shopName: leadData.shopName,
                 category: leadData.category,
                 ownerName: finalOwner,
@@ -541,13 +622,16 @@ async function scrapeGoogleMaps(options, updateProgress, onLeadScraped) {
                 onLeadScraped(completeLead);
             }
 
+            cardIdx++;
+
         } catch (err) {
-            console.error(`Error reading index ${i}:`, err.message);
+            console.error(`Error processing card index ${cardIdx}:`, err.message);
+            cardIdx++;
         }
     }
 
     await browser.close();
-    updateProgress(`Completed scrape for "${searchQuery}". Total extracted: ${processedLeads.length}`);
+    updateProgress(`Completed scrape for "${searchQuery}". Total unique extracted: ${processedLeads.length}`);
     return processedLeads;
 }
 

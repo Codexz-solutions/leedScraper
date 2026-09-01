@@ -1023,6 +1023,9 @@
             </div>
 
             <div class="header-actions">
+                <button class="btn btn-secondary btn-sm" onclick="triggerDeduplication()" title="Scan and merge any duplicate leads in the database">
+                    🧹 Clean Duplicates
+                </button>
                 <button class="btn btn-primary btn-sm" onclick="exportOutreachCSV()" title="Exports clean CSV with Owner Name, Company Name, Phone Number, and Email">
                     ✉️ Export Outreach CSV (Owner, Company, Phone, Email)
                 </button>
@@ -1236,6 +1239,115 @@
             if (checkbox.checked) document.getElementById('location').value = '';
         }
 
+        // Canonical Lead Fingerprinting on Client
+        function extractMapsIdentifiers(url) {
+            if (!url || typeof url !== 'string') return {};
+            const ids = {};
+            const hexMatch = url.match(/!1s(0x[0-9a-fA-F]+:0x[0-9a-fA-F]+)/);
+            if (hexMatch) ids.placeHex = hexMatch[1].toLowerCase();
+            try {
+                const decoded = decodeURIComponent(url);
+                const kgMatch = decoded.match(/(?:!16s|16s\/|16s%2F)(?:\/)?([0-9a-zA-Z_\/]+)/i);
+                if (kgMatch) {
+                    const kg = kgMatch[1].replace(/^\/+/, '').split(/[?&!]/)[0].toLowerCase();
+                    if (kg.length >= 4) ids.kgId = kg;
+                }
+            } catch(e) {}
+            const placePathMatch = url.match(/\/maps\/place\/([^/@?]+)/);
+            if (placePathMatch) {
+                ids.placeNamePath = decodeURIComponent(placePathMatch[1].replace(/\+/g, ' ')).toLowerCase().trim();
+            }
+            return ids;
+        }
+
+        function normalizePhoneDigits(phone) {
+            if (!phone || typeof phone !== 'string') return null;
+            const clean = phone.trim();
+            if (clean === '' || clean === 'N/A' || clean === 'None') return null;
+            const digits = clean.replace(/\D/g, '');
+            return digits.length >= 7 ? digits : null;
+        }
+
+        function normalizeWebsiteHost(url) {
+            if (!url || typeof url !== 'string' || !url.startsWith('http')) return null;
+            try {
+                const host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+                const generic = ['facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'linkedin.com', 'wa.me', 'google.com', 'wixsite.com'];
+                if (generic.some(d => host === d || host.endsWith('.' + d))) return null;
+                return host;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function normalizeStr(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        function getLeadFingerprintsClient(lead) {
+            if (!lead) return [];
+            const fps = [];
+            const mapsIds = extractMapsIdentifiers(lead.mapsUrl);
+            if (mapsIds.placeHex) fps.push(`hex:${mapsIds.placeHex}`);
+            if (mapsIds.kgId) fps.push(`kg:${mapsIds.kgId}`);
+            const phone = normalizePhoneDigits(lead.phone);
+            if (phone) {
+                fps.push(`phone:${phone}`);
+                if (phone.length >= 9) fps.push(`phone_tail:${phone.slice(-9)}`);
+            }
+            const web = normalizeWebsiteHost(lead.website);
+            if (web) fps.push(`web:${web}`);
+            const name = normalizeStr(lead.shopName);
+            const addr = normalizeStr(lead.address);
+            if (name && name !== 'local business' && name !== 'results') {
+                if (addr && addr !== 'na' && addr.length >= 6) {
+                    fps.push(`name_addr:${name}|${addr.slice(0, 25)}`);
+                }
+                if (mapsIds.placeNamePath) {
+                    fps.push(`name_path:${name}|${normalizeStr(mapsIds.placeNamePath)}`);
+                }
+            }
+            return fps;
+        }
+
+        function isSameLeadClient(a, b) {
+            if (!a || !b) return false;
+            if (a.id && b.id && String(a.id) === String(b.id)) return true;
+            const fpsA = new Set(getLeadFingerprintsClient(a));
+            const fpsB = getLeadFingerprintsClient(b);
+            for (const fp of fpsB) {
+                if (fpsA.has(fp)) return true;
+            }
+            const nameA = normalizeStr(a.shopName);
+            const nameB = normalizeStr(b.shopName);
+            if (nameA && nameB && nameA === nameB && nameA !== 'local business') {
+                const qA = normalizeStr(a.searchQuery);
+                const qB = normalizeStr(b.searchQuery);
+                if (qA && qB && qA === qB) return true;
+            }
+            return false;
+        }
+
+        async function triggerDeduplication() {
+            try {
+                showToast('Scanning for duplicate leads...', '🧹');
+                const res = await fetch('/api/leads/deduplicate', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    globalLeads = data.leads;
+                    renderTabs();
+                    applyFilters();
+                    showToast(`Cleaned ${data.removedCount} duplicates! Total: ${data.totalAfter}`, '✨');
+                } else {
+                    showToast('Failed to clean duplicates: ' + (data.error || 'Unknown error'), '❌');
+                }
+            } catch (e) {
+                console.error('Deduplication error:', e);
+                showToast('Error running deduplication', '❌');
+            }
+        }
+
         // Socket Event Listeners
         socket.on('scrape-started', (data) => {
             currentScrapeCount = 0;
@@ -1259,12 +1371,18 @@
             currentScrapeCount++;
             document.getElementById('progress-count').innerText = `${currentScrapeCount} collected`;
             
-            // Add lead if not duplicate
-            const existingIdx = globalLeads.findIndex(l => l.mapsUrl === singleLead.mapsUrl);
+            // Add or merge lead if already present
+            const existingIdx = globalLeads.findIndex(l => isSameLeadClient(l, singleLead));
             if (existingIdx === -1) {
                 globalLeads.unshift(singleLead);
             } else {
-                globalLeads[existingIdx] = singleLead;
+                globalLeads[existingIdx] = {
+                    ...globalLeads[existingIdx],
+                    ...singleLead,
+                    id: globalLeads[existingIdx].id,
+                    status: (globalLeads[existingIdx].status && globalLeads[existingIdx].status !== 'New') ? globalLeads[existingIdx].status : singleLead.status,
+                    notes: globalLeads[existingIdx].notes || singleLead.notes
+                };
             }
 
             renderTabs();

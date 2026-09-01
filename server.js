@@ -6,6 +6,7 @@ const path = require('path');
 const csvParser = require('csv-parser');
 const { Parser } = require('json2csv');
 const { scrapeGoogleMaps } = require('./scraper');
+const { deduplicateLeads, isSameLead, mergeLeadRecords } = require('./dedupe');
 
 const app = express();
 const server = http.createServer(app);
@@ -90,8 +91,10 @@ function saveLeads(leads) {
             fs.writeFileSync(CSV_FILE, header, 'utf8');
             return;
         }
+        // Always ensure leads are canonically deduplicated before writing to disk
+        const uniqueLeads = deduplicateLeads(leads);
         const json2csv = new Parser({ fields: CSV_FIELDS });
-        const csv = json2csv.parse(leads);
+        const csv = json2csv.parse(uniqueLeads);
         fs.writeFileSync(CSV_FILE, csv, 'utf8');
     } catch (err) {
         console.error('Error saving CSV:', err);
@@ -102,6 +105,26 @@ function saveLeads(leads) {
 app.get('/api/leads', async (req, res) => {
     const leads = await readLeads();
     res.json(leads);
+});
+
+// API: Manually Trigger Deduplication Cleanup
+app.post('/api/leads/deduplicate', async (req, res) => {
+    try {
+        const rawLeads = await readLeads();
+        const initialCount = rawLeads.length;
+        const dedupedLeads = deduplicateLeads(rawLeads);
+        saveLeads(dedupedLeads);
+        const removed = initialCount - dedupedLeads.length;
+        res.json({
+            success: true,
+            totalBefore: initialCount,
+            totalAfter: dedupedLeads.length,
+            removedCount: removed,
+            leads: dedupedLeads
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 // API: Update Lead Status & Notes
@@ -218,19 +241,11 @@ io.on('connection', (socket) => {
 
             const existingLeads = await readLeads();
 
-            // Deduplicate incoming leads against existing dataset
-            const existingMap = new Set(existingLeads.map(l => l.mapsUrl || `${l.shopName}_${l.phone}`));
-            const uniqueNewLeads = [];
+            // Find strictly new leads that don't match any existing lead
+            const uniqueNewLeads = newLeads.filter(nl => !existingLeads.some(el => isSameLead(el, nl)));
 
-            for (const lead of newLeads) {
-                const key = lead.mapsUrl || `${lead.shopName}_${lead.phone}`;
-                if (!existingMap.has(key)) {
-                    uniqueNewLeads.push(lead);
-                    existingMap.add(key);
-                }
-            }
-
-            const combined = [...uniqueNewLeads, ...existingLeads];
+            // Combine and canonicalize full dataset
+            const combined = deduplicateLeads([...newLeads, ...existingLeads]);
             saveLeads(combined);
 
             socket.emit('scrape-complete', {
@@ -246,6 +261,19 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`🚀 Lead Finder Dashboard live at: http://localhost:${PORT}`);
+    // Auto-clean any existing historical duplicates on startup
+    try {
+        const raw = await readLeads();
+        if (raw.length > 0) {
+            const deduped = deduplicateLeads(raw);
+            if (deduped.length !== raw.length) {
+                console.log(`🧹 Cleaned ${raw.length - deduped.length} duplicate leads from storage on startup.`);
+                saveLeads(deduped);
+            }
+        }
+    } catch (e) {
+        console.error('Startup deduplication error:', e.message);
+    }
 });
